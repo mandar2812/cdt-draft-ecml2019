@@ -1,0 +1,14 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.log
+*.blg
+*.aux
+*.bbl
+*.gz
+*.pdf
+.metals
+*.fls
+*.fdb*
+*.Rproj
