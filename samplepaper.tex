@@ -7,7 +7,6 @@
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{amssymb}
-%\usepackage{natbib}
 \bibliographystyle{splncs04}
 % Used for displaying a sample figure. If possible, figure files should
 % be included in EPS format.
@@ -221,11 +220,11 @@ $\mathbf{\pi}_{x(t)}$ is a measure over the input space $\mathcal{X}$.
 \subsection{Weighted Error}
 
 
-\begin{equation}\label{eq:errorfunc}
-\mathcal{L}(y(t + \tau), \hat{y}(t + \tau, x(t))) = 
-\left (y(t + \tau) - \hat{y}(t + \tau, x(t)) \right)^2 
+\begin{align}\label{eq:errorfunc}
+&\mathcal{L}(y(t + \tau), \hat{y}(t + \tau, x(t))) = \\ 
+\nonumber &\left (y(t + \tau) - \hat{y}(t + \tau, x(t)) \right)^2 
 (1 + \alpha \hat{p}(t + \tau, x(t)))
-\end{equation}
+\end{align}
 
 We want to avoid the situation where the model cherry picks one of the outputs 
 $j$ in the causal time window and concentrates most of the predictive 
@@ -247,10 +246,10 @@ time lag distribution $\hat{p}(x(t))$ and the \emph{target probability} $\tilde{
 We call this term \emph{causal divergence}.
 
 There are a number of candidate choices for defining the model's \emph{causal divergence}, 
-i.e.  \emph{Kullback-Leibler divergence} (\cite{kullback1951}), 
-\emph{Jensen-Shannon divergence} (\cite{jensen-shannon}), \emph{Total Variational distance} 
-(\cite{villani2009three}), \emph{Hellinger distance} (\cite{hellinger}) and 
-\emph{Bhattacharya distance} (\cite{bhattacharyya}) to name a few. 
+i.e.  \emph{Kullback-Leibler divergence} \cite{kullback1951}, 
+\emph{Jensen-Shannon divergence} \cite{jensen-shannon}, \emph{Total Variational distance} 
+\cite{villani2009three}, \emph{Hellinger distance} \cite{hellinger} and 
+\emph{Bhattacharya distance} \cite{bhattacharyya} to name a few. 
 
 We found that for the applications considered in this work, \emph{Kullback-Leibler divergence} 
 worked best. In principle it is possible to use any one of the mentioned 
@@ -340,20 +339,20 @@ Hyper-parameter selection is an important part of the model training process in 
 The hyper-parameter selection problem in deep learning has received much attention and a number 
 of methodologies have been proposed for tacking it. 
 
-\cite{snoek2012practical} cast the problem in the formalism of Bayesian optimization, their method 
+Snoek et. al \cite{snoek2012practical} cast the problem in the formalism of Bayesian optimization, their method 
 builds a Gaussian Process based surrogate model of the hyper-parameter fitness surface and computes 
 updates based on expected improvement. 
 
 
-\cite{hypBengio} demonstrate that sequential hyper-parameter search techniques yield state of the art 
+Bergstra et. al \cite{hypBengio} demonstrate that sequential hyper-parameter search techniques yield state of the art 
 results when applied on \emph{Deep Belief Nets} (DBN). 
 
-\cite{randomsearchBengio} showed that random search can be an effective way for tuning model 
+Bergstra \& Bengio \cite{randomsearchBengio} showed that random search can be an effective way for tuning model 
 hyper-parameters in several problem domains, and serve as a good baseline which can enable 
 further improvement in model performance.
 
-In the current work, we employ random search for tuning CDT hyper-parameters. Our proposed model 
-has two classes of hyper-parameters which we discuss below.
+In the current work, we employ random search for hyper-parameter selection. 
+Our proposed model has two classes of hyper-parameters which we discuss below.
 
 \subsection{Loss Function}
 
@@ -386,13 +385,13 @@ The composition and size of the layers preceding the output layer are dependent 
 one may choose \emph{convolutional layers} for input data which consists of images and fully connected 
 layers for vector data.
 
-\begin{figure}[h]
-\vspace{.3in}
-\centerline{\includegraphics[width=0.5\textwidth]{figures/network.jpg}}
-\vspace{.3in}
-\caption{Network architecture}
-\label{fig:network}
-\end{figure}
+%\begin{figure}[h]
+%\vspace{.3in}
+%\centerline{\includegraphics[width=0.5\textwidth]{figures/network.jpg}}
+%\vspace{.3in}
+%\caption{Network architecture}
+%\label{fig:network}
+%\end{figure}
 
 
 In section \ref{sec:exp}, we use fully connected neural architectures having a maximum depth of 
@@ -582,7 +581,7 @@ One observation common to the results of problems II and III is that the error d
 the time lag is asymmetric, the model tends to underestimate the time lag. Upon closer examination 
 of the predictions (figure \ref{fig:problem3_lag_error_jus}), it is observed that the data patterns 
 for which the model has a time lag prediction error $\leq -2.5$, tend to occur in lower region of 
-the output space (table \ref{table:problem3_stats}).
+the output space. %(table \ref{table:problem3_stats}).
 
 It is thus the case that for applications where there is an inverse relationship between the output 
 and time lag, the model's time lag errors are expected to be biased towards the negative region, 
@@ -598,20 +597,20 @@ but when output and time lag are positively correlated, the time lag errors shou
 
 
 
-\begin{table}[h]
-\caption{\textbf{Problem III}: Statistics of the Output distribution} \label{table:problem3_stats}
-\begin{center}
-\begin{tabular}{ll}
-\textbf{Statistic}  &\textbf{Value} \\
-\hline \\
-Minimum         & $111.7$ \\
-$1$st Quartile  & $182.3$ \\
-Median          & $252.1$ \\
-$3$rd Quartile  & $334.5$ \\
-Maximum         & $687.4$ \\
-\end{tabular}
-\end{center}
-\end{table}
+%\begin{table}[h]
+%\caption{\textbf{Problem III}: Statistics of the Output distribution} \label{table:problem3_stats}
+%\begin{center}
+%\begin{tabular}{ll}
+%\textbf{Statistic}  &\textbf{Value} \\
+%\hline \\
+%Minimum         & $111.7$ \\
+%$1$st Quartile  & $182.3$ \\
+%Median          & $252.1$ \\
+%$3$rd Quartile  & $334.5$ \\
+%Maximum         & $687.4$ \\
+%\end{tabular}
+%\end{center}
+%\end{table}
 
 
 \subsubsection{Problem IV}
@@ -662,6 +661,7 @@ surface of the Sun, i.e. sunspots and active regions.
 
 \subsubsection*{Acknowledgements}
 
+\clearpage
 \bibliography{references}
 
 \end{document}
