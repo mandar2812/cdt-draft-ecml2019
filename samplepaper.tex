@@ -24,9 +24,9 @@
 % If the paper title is too long for the running head, you can set
 % an abbreviated paper title here
 %
-\author{Mandar Chandorkar\inst{1,2}\orcidID{0000-1111-2222-3333} \and
-Cyril Furtlehner\inst{2}\orcidID{1111-2222-3333-4444} \and
-Enrico Camporeale\inst{1}\orcidID{2222--3333-4444-5555} \and 
+\author{Mandar Chandorkar\inst{1,2} \and
+Cyril Furtlehner\inst{2} \and
+Enrico Camporeale\inst{1} \and 
 Michele Sebag\inst{2}
 }
 %
@@ -35,11 +35,9 @@ Michele Sebag\inst{2}
 % If there are more than two authors, 'et al.' is used.
 %
 \institute{Centrum Wiskunde en Informatica, Amsterdam 1098XG, Netherlands \and
-Springer Heidelberg, Tiergartenstr. 17, 69121 Heidelberg, France
-\email{lncs@springer.com}\\
-\url{http://www.springer.com/gp/computer-science/lncs} \and
-ABC Institute, Rupert-Karls-University Heidelberg, Heidelberg, Germany\\
-\email{\{abc,lncs\}@uni-heidelberg.de}}
+Laboratoire de Recherche en Informatique,
+Bât 660 Université Paris-Sud 11,
+91405 Orsay Cedex France}
 %
 \maketitle              % typeset the header of the contribution
 %
@@ -118,8 +116,8 @@ mapping $g(.)$ which maps the time delay between the input and output patterns $
 This is formally specified in equations below.
 
 \begin{align}
-y(t + \Delta(t)) & = f[x(t)]\label{eq:pb1}\\
-\Delta(t) & = g[x(t)]\label{eq:pb2} 
+y(t + \tau(t)) & = f[x(t)]\label{eq:pb1}\\
+\tau(t) & = g[x(t)]\label{eq:pb2} 
 \end{align}
 with
 \[
@@ -158,7 +156,7 @@ As we shall see below, a probabilistic formualtion will lead us to a possible so
 for the CDT problem. 
 
 \begin{align} \label{eq:cdtprob}
-      &y(t) = \int_{-\infty}^{t}{f[x(t - \tau)] \rho(t, \tau, x(t - \tau))}d \tau \\
+      &y(t) = \int_{0}^{\infty}{f[x(t - \tau)] \rho(t, \tau, x(t - \tau))}d \tau \\
       & \nonumber \rho(t, \tau, x(t - \tau))  = \delta(\tau - g[x(t - \tau)])
 \end{align}
 
@@ -178,37 +176,70 @@ function.
 
 \section{Proposed Solution}\label{sec:model}
 
+In order to train time lag based models, one must balance two incentives.
+
+\begin{enumerate}
+    \item Generate accurate predictions $y(t + \tau)$
+    \item Learn the time lag structure $\rho(t + \tau, \tau, x(t))$.
+\end{enumerate}
+
+These incentives have very different contexts. We have access to measurements of the output 
+time series $y(t)$, but that is generally not the case for the time lag structure. Although it is 
+possible that certain data sets may have patterns annotated with time lag information, this 
+is not the norm.
+
+The predictive model consists of two estimators:
+
+\begin{enumerate}
+      \item Output $\hat{y}(t + \tau)$
+      \item Causal probability $\hat{p}(t + \tau, x(t))$.
+\end{enumerate}
+  
+
+We express the loss function as a sum of two terms (equation \ref{eq:cdtfunc}):
+
 \subsection{Causal Time Lag Risk Functional}
 
-\begin{align}
-&\mathcal{L}(\hat{y}, \hat{p}, \tilde{p}; x, y) = \\
-&\nonumber  \int_{x_{t} \in \mathcal{X}}{\int_{t}^{\infty}{\left ( 
-      y(t^{'}) - \hat{y}(t^{'}, x(t)) \right)^2 (1 + \alpha \hat{p}(t^{'}, x(t)))
-      }}dt^{'}dx(t) \\ 
+\begin{align}\label{eq:cdtfunc}
+&\mathcal{J}(\hat{y}, \hat{p}, \tilde{p}; x, y) = \\
+&\nonumber \lambda_1 \int_{\mathcal{X}}{
+      \int_{0}^{\infty}{
+            \mathcal{L}(y(t + \tau), \hat{y}(t + \tau, x(t))
+      }
+}d\tau d\mathbf{\pi}_{x(t)} \\ 
 & \nonumber \hspace{78pt}  + \\ 
-&\nonumber  \int_{x_{t} \in \mathcal{X}}{\int_{t}^{\infty}
-{\mathcal{H}\left(\hat{p}(t^{'}, x(t)), \tilde{p}(t^{'}, x(t))\right)}}dt^{'}dx(t)
+&\nonumber  \lambda_2 \int_{\mathcal{X}}{\int_{0}^{\infty}
+{\mathcal{H}\left(\hat{p}(t + \tau, x(t)), \tilde{p}(t + \tau, x(t))\right)}}d\tau d\mathbf{\pi}_{x(t)}
 \end{align}
 
-The first term, weighted with parameter $\lambda_1$ involves a weighted $L_2$ error between 
-the predictions $\hat{y}^{(m)}_{i}$ and the targets $y^{(m)}_{i}$. The second term, weighted 
-with parameter $\lambda_2$ has to penalize the predicted probabilities $\hat{p}^{(m)}$ in a meaningful 
-manner. 
+The first term, weighted with parameter $\lambda_1$, consists of an 
+error metric. The second term, weighted with parameter $\lambda_2$ has to 
+penalize the predicted probabilities $\hat{p}$ in a meaningful manner. 
+$\mathbf{\pi}_{x(t)}$ is a measure over the input space $\mathcal{X}$.
 
 
 \subsection{Weighted Error}
 
-We want to avoid the situation where the model cherry picks one of the outputs $j$ in the causal time 
-window and concentrates most of the predictive distribution $\hat p^{(m)}$ around the time index $j$. 
-The factor $(1 + \alpha \hat p_i^{(m)})$ instead of $\hat p_i^{(m)}$ in the first term contributes to avoid 
-this cherry picking effect. It forces the model to generate well performing predictions for the 
-entire causal window and then move its predictive distribution to peak around the most predictable 
-time index.
+
+\begin{equation}\label{eq:errorfunc}
+\mathcal{L}(y(t + \tau), \hat{y}(t + \tau, x(t))) = 
+\left (y(t + \tau) - \hat{y}(t + \tau, x(t)) \right)^2 
+(1 + \alpha \hat{p}(t + \tau, x(t)))
+\end{equation}
+
+We want to avoid the situation where the model cherry picks one of the outputs 
+$j$ in the causal time window and concentrates most of the predictive 
+distribution $\hat p^{(m)}$ around the time index $j$. The factor 
+$(1 + \alpha \hat p_i^{(m)})$ instead of $\hat p_i^{(m)}$ in the first term 
+contributes to avoid this cherry picking effect. It forces the model to 
+generate well performing predictions for the entire causal window and then 
+move its predictive distribution to peak around the most predictable time index.
 
 \subsection{Causal Divergence}
 
 It is important to penalize the model's causal time lag predictive distribution 
-$\hat{p}(x(t))$ so that the model learns the time lag structure inherent in the training data.
+$\hat{p}(x(t))$ so that the model learns the time lag structure inherent in the 
+training data.
 
 For this purpose we must define some \emph{target probability} $\tilde{p}(x)$ 
 (see section \ref{sec:targetprob}) and compute the divergence between the models causal 
@@ -218,25 +249,29 @@ We call this term \emph{causal divergence}.
 There are a number of candidate choices for defining the model's \emph{causal divergence}, 
 i.e.  \emph{Kullback-Leibler divergence} (\cite{kullback1951}), 
 \emph{Jensen-Shannon divergence} (\cite{jensen-shannon}), \emph{Total Variational distance} 
-(\cite{villani2009three}), \emph{Hellinger distance} (\cite{hellinger}) and \emph{Bhattacharya distance} 
-(\cite{bhattacharyya}) to name a few. 
+(\cite{villani2009three}), \emph{Hellinger distance} (\cite{hellinger}) and 
+\emph{Bhattacharya distance} (\cite{bhattacharyya}) to name a few. 
 
 We found that for the applications considered in this work, \emph{Kullback-Leibler divergence} 
-worked best. In principle it is possible to use any one of the mentioned divergence/distance measures 
-as a penalty, since the work outlined in this paper is general in nature.
+worked best. In principle it is possible to use any one of the mentioned 
+divergence/distance measures as a penalty, since the work outlined in this 
+paper is general in nature.
 
-\begin{align}
-\mathcal{H}\left(\hat{p}(t^{'}, x(t)), \tilde{p}(t^{'}, x(t))\right) &= \hat{p}(t^{'}, x(t)) \ 
-log \left( \frac{\hat{p}(t^{'}, x(t))}{\tilde{p}(t^{'}, x(t))}\right)
+\begin{align}\label{eq:causaldiv}
+\mathcal{H}\left(\hat{p}(t + \tau, x(t)), \tilde{p}(t + \tau, x(t))\right) &= \hat{p}(t + \tau, x(t)) \ 
+log \left( \frac{\hat{p}(t + \tau, x(t))}{\tilde{p}(t + \tau, x(t))}\right)
 \end{align}
 
-Our proposed approach works with discrete analogue of the time series $x(t), y(t)$ and does not 
-explicitly enforce assumptions 1 or 2, but instead tries to learn an estimator which for 
-every input $x(t)$, returns an output and time lag estimation. This enables us to benefit from 
-batch wise stochastic gradient learning methods and make our method scalable to larger data sets
-\footnote{Another possible approach which naturally come to mind, consists in to alternatively 
-optimize $f$ and $g$ by using a DTW routine in the loop. This however would be far more expensive
- and not really scalable to large datasets.}.
+\section{Discrete Formulation}
+
+Our proposed approach works with discrete analogue of the time series $x(t), y(t)$ 
+and does not explicitly enforce assumptions 1 or 2, but instead tries to learn an 
+estimator which for every input $x(t)$, returns an output and time lag estimation. 
+This enables us to benefit from batch wise stochastic gradient learning methods and 
+make our method scalable to larger data sets \footnote{Another possible approach which 
+naturally come to mind, consists in to alternatively optimize $f$ and $g$ by using a 
+DTW routine in the loop. This however would be far more expensive and not 
+really scalable to large datasets.}.
 
 In practical time-series applications, one works with sub-sampled or discretized versions of the time 
 series $x(t)$ and $y(t)$. The time delay function $g(.)$ can now be recast as a function which for 
@@ -265,22 +300,7 @@ for causal links in the finite window $[t+\ell, t+\ell+h)$, we have
 $\sum^{\ell+h-1}_{i = \ell}{\hat{p}(t + i)} = 1$.
 
 
-\section{Loss Function}
-
-In order to train time lag based models, one must balance two incentives.
-
-\begin{enumerate}
-    \item Generate accurate predictions for time window $y(t+\ell), \cdots, y(t+\ell+h-1)$
-    \item Learn the time lag structure.
-\end{enumerate}
-
-These incentives have very different contexts. We have access to measurements of the output 
-time series $y(t)$, but that is generally not the case for the time lag structure. Although it is 
-possible that certain data sets may have patterns annotated with time lag information, this 
-is not the norm.
-
-We express the loss function as a sum of two terms (equation \ref{eq:loss}):
-
+\subsection{Loss Function}
 
 \begin{equation}\label{eq:loss}
 \begin{aligned}
