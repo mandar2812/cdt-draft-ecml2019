@@ -139,7 +139,7 @@ formulation of the problem presented here:
 
 \begin{enumerate}
     \item $\phi(.)$ is assumed to be continuous and \emph{bijective}.
-    \item \cite{ZHOU2006195} enforce further assumptions such as 
+    \item Zhou \& Sornette \cite{ZHOU2006195} enforce further assumptions such as 
           $\phi(t_1) \leq \phi(t_2), \forall t_1 \leq t_2$, which are incorporated via constraints. 
           This approach respects the properties associated with the warping function $\phi(.)$ but 
           increase the computational complexity of the resulting optimization problem.
@@ -148,7 +148,7 @@ formulation of the problem presented here:
 The second assumption can be restrictive for applications in space physics, where fast moving 
 solar wind can reach the Earth before slow moving solar wind which departed before it. 
 
-\subsection{CDT: A Probabilistic Perspective}
+\subsection{CDT: A Probabilistic Perspective}\label{sec:cdtprobform}
 
 It is an interesting exercise to consider casting the CDT problem in a probabilistic framework.
 As we shall see below, a probabilistic formualtion will lead us to a possible solution method
@@ -169,33 +169,35 @@ As cause is assumed to preceed effect, the time lag is assumed to be strictly po
 The support of the \emph{causal probability} distribution is thus $\mathbb{R}^+$.
 
 In order to recover the relationships in equations \ref{eq:pb1} and \ref{eq:pb2}, we 
-set the \emph{causal probability} distribution to an appropriately chosen dirac delta 
-function.
+set the \emph{causal probability} distribution to the dirac delta function centered
+around $g[x(t - \tau)]$.
 
 
 \section{Proposed Solution}\label{sec:model}
 
-In order to train time lag based models, one must balance two incentives.
+From section \ref{sec:cdtprobform}, we can express the probabilistic CDT regression 
+problem as the learning of two tasks.
 
 \begin{enumerate}
-    \item Generate accurate predictions $y(t + \tau)$
-    \item Learn the time lag structure $\rho(t + \tau, \tau, x(t))$.
+    \item Generate accurate predictions for $y(t + \tau)$
+    \item Learn the \emph{causal probability} distribution $\rho(t + \tau, \tau, x(t))$.
 \end{enumerate}
 
-These incentives have very different contexts. We have access to measurements of the output 
-time series $y(t)$, but that is generally not the case for the time lag structure. Although it is 
-possible that certain data sets may have patterns annotated with time lag information, this 
-is not the norm.
-
-The predictive model consists of two estimators:
+The model therefore must consist of two estimators:
 
 \begin{enumerate}
       \item Output $\hat{y}(t + \tau)$
       \item Causal probability $\hat{p}(t + \tau, x(t))$.
 \end{enumerate}
-  
 
-We express the loss function as a sum of two terms (equation \ref{eq:cdtfunc}):
+
+We have access to measurements of the output time series $y(t)$, but that is 
+generally not the case for the time lag structure. Although it is possible 
+that certain data sets may have patterns annotated with time lag information, 
+this is not the norm.  
+
+
+We now propose a \emph{causal time lag risk functional} (equation \ref{eq:cdtfunc}):
 
 \subsection{Causal Time Lag Risk Functional}
 
@@ -257,8 +259,8 @@ divergence/distance measures as a penalty, since the work outlined in this
 paper is general in nature.
 
 \begin{align}\label{eq:causaldiv}
-\mathcal{H}\left(\hat{p}(t + \tau, x(t)), \tilde{p}(t + \tau, x(t))\right) &= \hat{p}(t + \tau, x(t)) \ 
-log \left( \frac{\hat{p}(t + \tau, x(t))}{\tilde{p}(t + \tau, x(t))}\right)
+&\mathcal{H}\left(\hat{p}(t + \tau, x(t)), \tilde{p}(t + \tau, x(t))\right) = \\
+&\nonumber \hat{p}(t + \tau, x(t)) \ log \left( \frac{\hat{p}(t + \tau, x(t))}{\tilde{p}(t + \tau, x(t))}\right)
 \end{align}
 
 \section{Discrete Formulation}
