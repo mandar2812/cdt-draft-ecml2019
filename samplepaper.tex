@@ -172,6 +172,70 @@ In order to recover the relationships in equations \ref{eq:pb1} and \ref{eq:pb2}
 set the \emph{causal probability} distribution to the dirac delta function centered
 around $g[x(t - \tau)]$.
 
+\subsection{Likelihood formulation in the discrete case}
+Suppose we discretize time in units of $\delta t$, such that for a given event $x^{(m)}$ at time  $t = m\ \delta t$, the possible time lag $\tau^{(m)}$ is within a window
+$[\tau_{min},\tau_{max}]$. This interval is as well discretized into $n = (\tau_{max}-\tau_{min})/\delta t $ intervals so that the effect if any of this event has to be found in the vector of size $n$ of possible effects denoted ${\bf y}^{(m)} = \{y_1^{(m)},\ldots,y_n^{(m)}\}$.
+Our probabilistic formulation is given by the following conditional probability distribution:
+\begin{align*}
+P\bigl[{\bf y}^{m} = {\bf y}\vert x^{(m)}=x\bigr] &= \\[0.2cm] \sum_{\{\tau_i\in\{0,1\}\}}
+& \tilde p\bigl(\tau_1,\ldots,\tau_n\vert x)
+\frac{1}{(2\pi)^{n/2}\prod_i\sigma(\tau_i)}
+\exp\Bigl(-\frac{1}{2}\sum_{i=1}^n\frac{\bigl(y_i-\hat y_i(x)\bigr)^2}{\sigma(\tau_i)^2}\Bigr),
+\end{align*}
+with 
+\[
+\sigma(\tau)^2 = \frac{\sigma^2}{1+\alpha \tau},
+\]
+with $\sigma^2$ a default variance and $\alpha\ge 0$ a non-negative real parameter and $\hat y(x)$ a vector of mean effects corresponding to a given cause $x$. 
+The meaning of this is the following: for a given cause $x$ the effect
+$y_i$ at horizon $i$ has a normal distribution centered on $\hat y_i(x)$ with  variance $\sigma^2(\tau_i)$ independent of $x$ as a simplifying assumption. $\{\tau_1,\ldots,\tau_n\}$ is a set of binary latent variables encoding the stochastic causal time lag, by telling whether $x$ causes $y_i$ ($\tau_i=1$) or not ($\tau_i=0$). Since we expect approximately a one to one correspondence between causes $x_t$ and effect $y_{t+\tau(t)}$ we impose on the joint probability $\tilde p(\tau_1,\ldots,\tau_n\vert x)$ the constraint
+\begin{equation}\label{eq:cs1}
+\mathbb E\Bigl(\sum_{i=1}^n \tau_i\vert x \Bigr) = 1,
+\end{equation}
+which means that $x$ causes one single effect in average among the $n$ possible ones. The fact that $x$ can influence $y_i$ through the bias $\hat y_i(x)$ even when $\tau_i=0$ reflects an indirect influence due to a finite auto-correlation time of $y_t$. But this comes with a higher variance, 
+since $\sigma(0)^2\ge \sigma(1)^2$, controlled by the parameter $\alpha$.
+A large value of $\alpha$ should correspond to a small auto-correlation time. Remains then to specify 
+$p(\tau_1,\ldots,\tau_n\vert x)$. In this paper we chose the simplest possibility, namely a product of independent variables:
+\[
+\tilde p(\tau_1,\ldots,\tau_n\vert x)= \prod_{i=1}^n \tilde p_i(\tau_i\vert x),
+\]
+with the constraint (\ref{eq:cs1}) reading
+\[
+\sum_{i=1}^n \tilde p_i(\tau_i=1\vert x) = 1.
+\]
+We are now in position to justify the loss function which will be used later on to train our model, as arising from a large deviation functional of the likelihood. Indeed assume that the number of learning samples tends to infinity, and so that in a small volume $dv = dxd\bf y$ around a given  joint configuration $(x,\bf y)$, the number of data $N_{x,\bf y}$ becomes large. Restricting the likelihood to this subset of the data yields the following:
+\[
+{\cal L}_{x,{\bf y}} = \prod_{m=1}^{N_{x,{\bf y}}} \sum_{\{\tau^{(m)}\}}\prod_{i=1}^n 
+\frac{\tilde p_i(\tau_i^{(m)}\vert x)}{\sqrt{2\pi}\ \sigma(\tau_i^{(m)})}
+\exp\Bigl(-\frac{1}{2}\sum_{i=1}^n\frac{\bigl(y_i-\hat y_i(x)\bigr)^2}{\sigma(\tau_i^{(m)})^2}\Bigr).
+\]
+Upon introducing the (discrete) counting measures:
+\[
+\hat p_i = \frac{1}{N_{x,{\bf y}}}\sum_{m=1}^{N_{x,{\bf y}}} \tau_i^{(m)} 
+\]
+the sum over the $\tau_i^{(m)}$ is replaced by a sum over these new variables, with the summand obeying a large deviation principle (see e.g.~\cite{Touchette})
+\[
+{\cal L}_{x,{\bf y}} \asymp \sum_{\hat {\bf p}} 
+\exp\Bigl(-N_{x,{\bf y}} {\cal F}_{x,{\bf y}}\bigl[\hat {\bf p}\bigr]\Bigr)
+\]
+where the rate function simply reads from Sanov's theorem
+\[
+{\cal F}_{x,{\bf y}}\bigl[\{\hat p\}\bigr] = n\log(\sigma)+
+\frac{1}{2}\sum_{i=1}^n\Bigl[\bigl(y_i-\hat y_i(x)\bigr)^2\frac{1+\alpha\hat p_i}{\sigma^2}
++\hat p_i\log(1+\alpha)+\hat p_i\log\frac{\hat p_i}{\tilde p_i}\Bigr].
+\]
+Taking the saddle point yields the following:
+\[
+\hat p_i(x,{\bf y}) = \frac{1}{\sqrt{1+\alpha}}\tilde p_i(x)\exp\Bigl(-\frac{\alpha}{2\sigma^2}\bigl(y_i-\hat y_i(x)\bigr)^2\Bigr).
+\]
+In summary we have two coupled regression problems $\hat {\bf y}(x)$
+and $\hat {\bf p}(x)$ to solve, with loss function ${\cal L}\bigl[\hat {\bf y},\hat {\bf p}\bigr]$ identified to the empirical mean over the dataset of the rate function ${\cal F}_{x,{\bf y}}\bigl[\hat {\bf p}\bigr]$.
+
+
+
+
+
+
 
 \section{Proposed Solution}\label{sec:model}
 
