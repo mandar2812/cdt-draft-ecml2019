@@ -3,7 +3,8 @@
 % Version 2.20 of 2017/10/04
 %
 \documentclass[runningheads]{llncs}
-%
+
+\usepackage{paralist}
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -184,22 +185,19 @@ problem as the learning of two tasks.
 \end{enumerate}
 
 The model therefore must consist of two estimators:
-
-\begin{enumerate}
+\begin{inparaenum}[1.]
       \item Output $\hat{y}(t + \tau)$
       \item Causal probability $\hat{p}(t + \tau, x(t))$.
-\end{enumerate}
-
-
+\end{inparaenum} 
 We have access to measurements of the output time series $y(t)$, but that is 
 generally not the case for the time lag structure. Although it is possible 
 that certain data sets may have patterns annotated with time lag information, 
-this is not the norm.  
-
-
-We now propose a \emph{causal time lag risk functional} (equation \ref{eq:cdtfunc}):
+this is not the norm.
 
 \subsection{Causal Time Lag Risk Functional}
+
+We now propose a \emph{causal time lag risk functional} 
+(equation \ref{eq:cdtfunc}):
 
 \begin{align}\label{eq:cdtfunc}
 &\mathcal{J}(\hat{y}, \hat{p}, \tilde{p}; x, y) = \\
@@ -262,6 +260,18 @@ paper is general in nature.
 &\mathcal{H}\left(\hat{p}(t + \tau, x(t)), \tilde{p}(t + \tau, x(t))\right) = \\
 &\nonumber \hat{p}(t + \tau, x(t)) \ log \left( \frac{\hat{p}(t + \tau, x(t))}{\tilde{p}(t + \tau, x(t))}\right)
 \end{align}
+
+\subsection{Causal Probability Estimator}
+
+By variationally expansion, we can compute $\hat{p}(t + \tau, x(t))$ which optimizes the risk functinal in 
+equation \ref{eq:cdtfunc}.
+
+\begin{align}
+      \mathcal{J}(\hat{y}, \hat{p} + \delta \hat{p}, \tilde{p}; x, y) = 
+      \mathcal{J}(\hat{y}, \hat{p}, \tilde{p}; x, y) + 
+      \int_a^b \frac{\delta \mathcal{J}}{\delta \hat{p}} {\delta p} \ dx
+\end{align}
+
 
 \section{Discrete Formulation}
 
