@@ -2,10 +2,13 @@
 % LLNCS macro package for Springer Computer Science proceedings;
 % Version 2.20 of 2017/10/04
 %
-\documentclass[runningheads]{llncs}
+\documentclass[envcountsect,runningheads]{llncs}
 
 \usepackage{paralist}
 \usepackage{graphicx}
+\let\proof\relax
+\let\endproof\relax
+\usepackage{amsthm}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \bibliographystyle{splncs04}
@@ -15,8 +18,23 @@
 % If you use the hyperref package, please uncomment the following line
 % to display URLs in blue roman font according to Springer's eBook style:
 % \renewcommand\UrlFont{\color{blue}\rmfamily}
+% Style de théorème sur mesure.
+\newtheoremstyle{etoile}{\parskip}{\parskip}{\itshape}
+                        {0pt}{\bfseries\sffamily}{.}{ }{}
+\theoremstyle{etoile}
+\def\proofname{\normalfont\bfseries\sffamily Proof}
+\newcommand\bbox{\hfill\rule{2mm}{2mm}}
+\let\qed=\bbox
+% Les théoremes
+\newtheorem{prop}{Proposition}[section]
+\newtheorem{coro}[prop]{Corollaire}
+\newtheorem{theo}[prop]{Theorem}
+\newtheorem{defin}[prop]{Definition}
+\newtheorem{lem}[prop]{Lemma}
 
 \def\DD{\displaystyle}
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator*{\argmax}{argmax}
 
 
 \begin{document}
@@ -178,21 +196,23 @@ set the \emph{causal probability} distribution to the dirac delta function cente
 around $g[x(t - \tau)]$.
 
 \subsection{Likelihood formulation in the discrete case}
+
 Suppose we discretize time in units of $\delta t$, such that for a given event $x^{(m)}$ at time  $t = m\ \delta t$, the possible time lag $\tau^{(m)}$ is within a window
 $[\tau_{min},\tau_{max}]$. This interval is as well discretized into $n = (\tau_{max}-\tau_{min})/\delta t $ intervals so that the effect if any of this event has to be found in the vector of size $n$ of
 possible effects denoted ${\bf y}^{(m)} = \{y_1^{(m)},\ldots,y_n^{(m)}\}$.
 Our probabilistic formulation is given by the following conditional probability distribution:
-\begin{align*}
-P\bigl[{\bf y}^{m} = {\bf y}\vert x^{(m)}=x\bigr] &= \\[0.2cm] \sum_{\{\tau_i\in\{0,1\}\}}
-& \tilde p\bigl(\tau_1,\ldots,\tau_n\vert x)
+\begin{align}
+  P\bigl[{\bf y}^{m} = {\bf y}\vert x^{(m)}=x\bigr] &= \nonumber\\[0.2cm]
+  \sum_{\{\tau_i\in\{0,1\}\}} & \tilde p\bigl(\tau_1,\ldots,\tau_n\vert x)
 \frac{1}{(2\pi)^{n/2}\prod_i\sigma_i({\bf \tau})}
-\exp\Bigl(-\frac{1}{2}\sum_{i=1}^n\frac{\bigl(y_i-\hat y_i(x)\bigr)^2}{\sigma_i({\bf \tau})^2}\Bigr),
-\end{align*}
+\exp\Bigl(-\frac{1}{2}\sum_{i=1}^n\frac{\bigl(y_i-\hat y_i(x)\bigr)^2}{\sigma_i({\bf \tau})^2}\Bigr),\label{eq:py}
+\end{align}
 with 
 \[
 \sigma_i({\bf \tau})^{-2} = \Bigl(1+\sum_j\alpha_{ij} \tau_j\Bigr)\sigma^{-2},
 \]
 with $\sigma^2$ a default variance and $\alpha_{ij}\ge 0$ a matrix of non-negative real parameter and $\hat y(x)$ a vector of mean effects corresponding to a given cause $x$. 
+This is a local mixture model function of the input variable $x$.
 The meaning of this is the following: for a given cause $x$ the effect
 $y_i$ at horizon $i$ has a normal distribution centered on $\hat y_i(x)$ with  variance $\sigma_i^2({\bf \tau})$ independent of $x$ as a simplifying assumption. $\{\tau_1,\ldots,\tau_n\}$ is a set of binary
 latent variables encoding the stochastic causal time lag, by telling whether $x$ causes $y_i$ ($\tau_i=1$) or not ($\tau_i=0$). Since we expect a one to one correspondence between causes
@@ -218,13 +238,13 @@ We are now in position to justify the loss function which will be used later on 
 \frac{\tilde p(\tau^{(m)}\vert x)}{\prod_{i=1}^n\sqrt{2\pi}\ \sigma_i(\tau^{(m)})}
 \exp\Bigl(-\frac{1}{2}\sum_{i=1}^n\frac{\bigl(y_i-\hat y_i(x)\bigr)^2}{\sigma_i(\tau^{(m)})^2}\Bigr).
 \]
-Upon introducing the (discrete) counting measures:
+Upon introducing the relative frequencies:
 \[
-\hat p_i = \frac{1}{N_{x,{\bf y}}}\sum_{m=1}^{N_{x,{\bf y}}} \tau_i^{(m)} 
+\hat p_i(x,{\bf y}) = \frac{1}{N_{x,{\bf y}}}\sum_{m=1}^{N_{x,{\bf y}}} \tau_i^{(m)} 
 \]
 with the constraint
 \begin{equation}\label{eq:cs2}
-\sum_{i=1}^n \hat p_i(x) = 1,
+\sum_{i=1}^n \hat p_i(x,{\bf y}) = 1,
 \end{equation}
 the sum over the $\tau_i^{(m)}$ is replaced by a sum over these new variables, with the summand obeying a large deviation principle (see e.g.~\cite{Touchette})
 \[
@@ -234,37 +254,42 @@ the sum over the $\tau_i^{(m)}$ is replaced by a sum over these new variables, w
 where the rate function simply reads from Sanov's theorem
 \[
 {\cal F}_{x,{\bf y}}\bigl[\{\hat p\}\bigr] = n\log(\sigma)+
-\frac{1}{2}\sum_{i=1}^n\Bigl[\bigl(y_i-\hat y_i(x)\bigr)^2\frac{1+\sum_j\alpha_{ij}\hat p_j}{\sigma^2}
--\hat p_i\sum_j\log(1+\alpha_{ji})+\hat p_i\log\frac{\hat p_i}{\tilde p_i}\Bigr].
+\sum_{i=1}^n\Bigl[\bigl(y_i-\hat y_i(x)\bigr)^2\frac{1+\sum_j\alpha_{ij}\hat p_j}{2\sigma^2}
+-\frac{1}{2}\hat p_i\sum_j\log(1+\alpha_{ji})+\hat p_i\log\frac{\hat p_i}{\tilde p_i}\Bigr].
 \]
 Taking the saddle point yields the following:
-\[
-\hat p_i(x,{\bf y}) = \frac{1}{Z}\tilde p_i(x)\exp\Bigl(-\frac{1}{2\sigma^2}\sum_j\alpha_{ji}\bigl(y_j-\hat y_j(x)\bigr)^2+\frac{1}{2}\sum_j\log(1+\alpha_{ji})\Bigr),
-\]
-with $Z$ insuring the normalization~(\ref{eq:cs2}). This suggest to formulate the problem as two coupled regression problems $\hat {\bf y}(x)$ and $\hat {\bf p}(x)$ given a set of observations $\{(x^{m},{\bf y}^{m})\}$ where the loss function ${\cal L}\bigl[\hat {\bf y},\hat {\bf p}\bigr]$ is simply the empirical mean of ${\cal F}_{x,{\bf y}}\bigl[\hat {\bf p}(x)\bigr]$ over the learning set. In this scheme, $\tilde {\bf p}(x)$ appears as  a prior probability where all the prior knowledge on the cause-effect relationship has been inserted. As a consequence the optimization of $\hat p$ given the predictor $\hat y(x)$ is
-formally solved explicitly. Indeed, 
-$\partial {\cal L}\bigl[\hat {\bf y},\hat {\bf p}\bigr]/\partial \hat {\bf p}(x) = 0$ yields
 \begin{equation}\label{eq:hatpi}
-\hat p_i(x) = \frac{1}{Z}\tilde p_i(x)\exp\Bigl(-\frac{1}{2\sigma^2}\sum_j\alpha_{ji}{\mathbb E}_{data}\Bigl[\bigl(y_j-\hat y_j(x)\bigr)^2\vert x\Bigr]+\frac{1}{2}\sum_j\log(1+\alpha_{ji})\Bigr).
+\hat p_i(x,{\bf y}) = \frac{1}{Z(\sigma,{\bf \alpha})}\tilde p_i(x)\exp\Bigl(-\frac{1}{2\sigma^2}\sum_j\alpha_{ji}\bigl(y_j-\hat y_j(x)\bigr)^2+\frac{1}{2}\sum_j\log(1+\alpha_{ji})\Bigr),
 \end{equation}
-In parallel the parameters of the model can be optimized to yield the following natural estimates:
+with
+\[
+Z(\sigma,{\bf \alpha}) = \sum_{i=1}^n\tilde p_i(x)\exp\Bigl(-\frac{1}{2\sigma^2}\sum_j\alpha_{ji}\bigl(y_j-\hat y_j(x)\bigr)^2+\frac{1}{2}\sum_j\log(1+\alpha_{ji})\Bigr),
+\]
+insuring the normalization~(\ref{eq:cs2}). $\hat p_i(x,{\bf y})$ is actually the conditional probability $P(\tau_i=1\vert x,y)$ which can be obtained from~(\ref{eq:py}).
+Using this the log likelihood can be expressed as
+\[
+  {\cal L}\bigl[\hat {\bf y},\sigma,{\bf \alpha}] = -\frac{n}{2}\log(\sigma)-{\mathbb E}_{data}\Bigl[\frac{1}{2\sigma^2}\sum_{i=1}^n\bigl(y_i-\hat y_i(x)\bigr)^2
+    -\log\bigl(Z(\sigma,{\bf \alpha})\bigr)\Bigr],
+\]
+The parameters of the model can be optimized to yield the following natural estimates:
 \begin{equation}\label{eq:var}
-\frac{\sigma^2}{1+\alpha_{ij}} = \frac{{\mathbb E}_{data}\bigl[\bigl(y_i-\hat y_i(x)\bigr)^2\hat p_j(x)\bigr]}{{\mathbb E}_{data}\bigl[\hat p_j(x)\bigr]},
+\frac{\sigma^2}{1+\alpha_{ij}} = \frac{{\mathbb E}_{data}\bigl[\bigl(y_i-\hat y_i(x)\bigr)^2\hat p_j(x,{\bf y})\bigr]}{{\mathbb E}_{data}\bigl[\hat p_j(x,{\bf y})\bigr]},
 \end{equation}
 (the optimization of $\sigma$ does not yield an independent equation).
-These are implicit equations, since $\hat {\bf p}(x)$ depends on the parameters $\sigma^2$ and $\alpha_{ij}$ which can be solved by alternatively updating $\hat {\bf p}$
-and the parameters through equations~(\ref{eq:hatpi}) and~(\ref{eq:var}).
+These are implicit equations, since $\hat {\bf p}(x,{\bf y})$ depends on the parameters $\sigma^2$ and $\alpha_{ij}$.
+%which can be solved by alternatively updating $\hat {\bf p}$
+%and the parameters through equations~(\ref{eq:hatpi}) and~(\ref{eq:var}).
 
-R1: insist somewhere that from the practical point of view, $\hat {\bf p}(x)$ is learned via the regression which given $x$ only tries to predict $\hat {bf p}(x,{\bf y})$.
+Finally note that $\tilde p$ is also subject of being optimized. We have
+\[
+\frac{\partial{\cal L}}{\partial \tilde p_i(x)} = {\mathbb E}_{data,y}\Bigl[\frac{\hat p_i(x,{\bf y})}{\tilde p(x)}-\lambda(x)\Bigr],
+\]
+with $\lambda(x)$ a Lagrange multiplier to insure that $\sum_i\tilde p_i(x)=1$ for any $x$. Therefore we simply get ($\lambda(x)=1$)
+\begin{equation}\label{eq:tildep}
+\tilde p_i(x) = {\mathbb E}_{data,y}\Bigl[\hat p_i(x,{\bf y})\Bigr].
+\end{equation}
 
-R2: what would that means to optimize $\tilde p$ in the end? 
-
-R3: Symmetry on the prior $\tilde p$.
-
-
-
-
-
+RQ3: Symmetry on the prior $\tilde p$.
 
 
 \subsection{Linear stability analysis}
@@ -286,7 +311,7 @@ we restrict the analysis to the set of parameters
 which leaves us with only two parameters $\alpha$ and $r = \sigma^2/\sigma_0^2$. The log likelihood as a function of $r$ and $\alpha$ after inserting the optimal
 $\hat {\bf p} = \hat {\bf p}(x,{\bf y})$ reads in that case
 \[
-{\cal L}(r,\alpha) = -\frac{n}{2}\log(r)-\frac{n}{2r}-{\mathbb E}_{data}\Bigl(\log(Z)\Bigr)
+{\cal L}(r,\alpha) = -\frac{n}{2}\log(r)-\frac{n}{2r}+{\mathbb E}_{data}\Bigl(\log(Z)\Bigr)
 \]
 with
 \[
@@ -294,52 +319,78 @@ Z = \sum_i \tilde p_i(x)\exp\Bigl(-\frac{\alpha}{2r\sigma_0^2}\Delta y_i^2(x)+\f
 \]
 The gradient reads
 \begin{align*}
-  \frac{\partial {\cal L}}{\partial r} &= \frac{n}{2r^2}\Bigl(1-r-\frac{\alpha}{n}C_1[\hat {\bf p}]\Bigr),\\[0.2cm]
-  \frac{\partial {\cal L}}{\partial \alpha} &= \frac{1}{2(1+\alpha)}-\frac{1}{2r}C_1[\hat {\bf p}],  
+  \frac{\partial {\cal L}}{\partial r} &= \frac{n}{2r^2}\Bigl(1-r+\frac{\alpha}{n}C_1[\hat {\bf p}]\Bigr),\\[0.2cm]
+  \frac{\partial {\cal L}}{\partial \alpha} &= -\frac{1}{2(1+\alpha)}+\frac{1}{2r}C_1[\hat {\bf p}],  
 \end{align*}
 with
 \[
-C_1[\hat {\bf p}] = \frac{1}{\sigma_0^2}{\mathbb E}\Bigl(\sum_{i=1}^n \hat p_i(x,{\bf y})\Delta y_i^2(x)\Bigr),
+C_1[\hat {\bf p}] = \frac{1}{\sigma_0^2}{\mathbb E}_{data}\Bigl(\sum_{i=1}^n \hat p_i(x,{\bf y})\Delta y_i^2(x)\Bigr),
 \]
 the covariance between ${\bf \tau}$ and the normalized predictor errors. $C_1$ smaller than one 
 indicates a positive correlation between the latent variables and small error. 
 This leads to the following relation at the saddle point:
 \begin{align*}
-  r &= \frac{n+C_1[\hat {\bf p}]}{n+1}\\[0.2cm]
-\alpha &= \frac{n(1-r)}{1-(n+1)(1-r)}.
+  r &= \frac{n-C_1[\hat {\bf p}]}{n-1}\\[0.2cm]
+\alpha &= \frac{n}{n-1}\frac{1-C_1[\hat {\bf p}]}{C_1[\hat {\bf p}]}.
 \end{align*}
 Let us now compute the Hessian. Denoting
 \[
-C_2[\hat {\bf p}] = \frac{1}{\sigma_0^4}{\mathbb E}\Bigl[\sum_{i=1}^n \hat p_i(x,{\bf y})\Bigl(\Delta y_i^2(x)-\sum_{j=1}^n\hat p_j(x,{\bf y})\Delta y_j^2(x)\Bigr)^2\Bigr],
+C_2[\hat {\bf p}] = \frac{1}{\sigma_0^4}{\mathbb E}_{data}\Bigl[\sum_{i=1}^n \hat p_i(x,{\bf y})\Bigl(\Delta y_i^2(x)-\sum_{j=1}^n\hat p_j(x,{\bf y})\Delta y_j^2(x)\Bigr)^2\Bigr],
 \]
 we have
 \begin{align*}
-\frac{\partial^2 {\cal L}}{\partial r^2} &= -\frac{n}{2r^2}\Bigl(1+2\frac{1-r}{r}-\frac{2\alpha}{r}C_1[\hat {\bf p}]+\frac{\alpha}{2nr^2}C_2[\hat {\bf p}]\Bigr)\\[0.2cm]
-\frac{\partial^2 {\cal L}}{\partial r\partial \alpha} &=\frac{1}{2r^2}\Bigl(\frac{\alpha}{2r}C_2[\hat {\bf p}]-C_1[\hat {\bf p}]\Bigr)\\[0.2cm]
-\frac{\partial^2 {\cal L}}{\partial \alpha^2} &= -\frac{1}{2(1+\alpha)^2}+\frac{1}{4r^2}C_2[\hat {\bf p}]. 
+\frac{\partial^2 {\cal L}}{\partial r^2} &= -\frac{n}{2r^2}\Bigl(1+2\frac{1-r}{r}+\frac{2\alpha}{nr}C_1[\hat {\bf p}]-\frac{\alpha^2}{2nr^2}C_2[\hat {\bf p}]\Bigr)\\[0.2cm]
+\frac{\partial^2 {\cal L}}{\partial r\partial \alpha} &=\frac{1}{2r^2}\Bigl(C_1[\hat {\bf p}]-\frac{\alpha}{2r}C_2[\hat {\bf p}]\Bigr)\\[0.2cm]
+\frac{\partial^2 {\cal L}}{\partial \alpha^2} &= \frac{1}{2(1+\alpha)^2}-\frac{1}{4r^2}C_2[\hat {\bf p}]. 
 \end{align*}
 As a result, the Hessian evaluated at the degenerate point $\alpha=0$, $r=1$, $\hat  p_i=1/n$ uniform reads
 \[
-H =
+H =\frac{1}{2}
 \left[
   \begin{matrix}
- -n & -1\\[0.4cm] 
--1 & \qquad\DD\frac{C_2}{2} -1
+ -n & 1\\[0.4cm] 
+ 1 & \qquad\DD 1-\frac{C_2}{2}
   \end{matrix}
   \right]
 \]
 where
 \[
-C_2 = \frac{1}{n\sigma_0^4}{\mathbb E}\Bigl[\sum_{i=1}^n \Bigl(\Delta y_i^2(x)-\frac{1}{n}\sum_{j=1}^n\Delta y_j^2(x)\Bigr)^2\Bigr].
+C_2 = \frac{1}{n\sigma_0^4}{\mathbb E}_{data}\Bigl[\sum_{i=1}^n \Bigl(\Delta y_i^2(x)-\frac{1}{n}\sum_{j=1}^n\Delta y_j^2(x)\Bigr)^2\Bigr].
 \]
-
 In order to insure that the degenerate point is not a local maximum, we need that at least one of the eigenvalues of the Hessian be positive.
-The oposite situation occurs when the trace of $H$ is negative and the determinant is positive, so to avoid that we need
+The opposite situation occurs when the trace of $H$ is negative and the determinant is positive, so to avoid that we need
 \[
-C_2 > 2-\frac{1}{n}.
+C_2 < 2\bigl(1+\frac{1}{n}\bigr).
 \]
-In words this means that variance of the predictors among the temporal channels has to be twice $\sigma_0^4$
-to start to see something detected.
+In words this means that variance among the temporal channels of the predictors errors has to be twice the squared variance 
+of the errors to start to see something detected.
+
+\subsection{Loss function and associated optimal predictor}
+Once the set $\hat {\bf y}(x)$ of predictors is learned and assuming that the correct parameters for~(\ref{eq:py}) have been found
+we would like to know given $x$, what is the optimal predictor for $y_i(x)$. Any predictor has  to come in a composite form
+$\hat z(x) = (\hat y(x),\hat I(x))$ where $\hat I(x)$ is the predicted index and $\hat y(x)$ the predicted value.
+This is necessarily associated to a loss function 
+which we specify as an $L_2$ norm:
+\[
+{\cal L}(\hat y,\hat I) = {\mathbb E}_{data}\Bigl[\bigl(y_{\hat I(x)}-\hat y(x)\bigr)^2\Bigr]. 
+\]
+Then we have the following statement:
+\begin{prop}
+Based on~(\ref{eq:py}), the optimal composite predictor $(y^\star,I^\star)$ is given by
+\[
+y^\star(x) = \hat y_{\hat I(x)}(x)\qquad\text{with}\qquad I^\star(x) = \argmax_{i} \bigl(\hat p_i(x)\bigr), 
+\]
+where
+\[
+\hat p_i(x) = {\mathbb E}_y\Bigl[\hat p_i(x,{\bf y})\Bigr],
+\]
+$\hat p_i(x,{\bf y}) = p(\tau_i=1\vert x,y)$ being given in~(\ref{eq:hatpi}). 
+\end{prop}
+
+
+
+
+
 
 
 \section{Proposed Solution}\label{sec:model}
