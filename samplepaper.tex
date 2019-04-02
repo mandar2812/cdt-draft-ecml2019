@@ -39,7 +39,7 @@
 
 \begin{document}
 %
-\title{Causal Dynamic Time Lag: Predicting What \& When}
+\title{Probabilistic Dynamic Time Lag: Predicting What \& When}
 %
 %\titlerunning{Abbreviated paper title}
 % If the paper title is too long for the running head, you can set
@@ -64,12 +64,10 @@ CIRES, University of Colorado, Boulder, CO, USA}
 \maketitle              % typeset the header of the contribution
 %
 \begin{abstract}
-  We formalize the joint regression task of predicting the magnitude of signals as well as the 
-  time delay with respect to their driving phenomena. We call the problem 
-  \emph{causal dynamic time lag} (CDT), to take note of the non-stationary time delay between the 
-  occurrence of causes/drivers and the observation of effects in physical and man-made systems. 
-  We propose a solution to the CDT problem and a methodology to benchmark and evaluate 
-  causal time lag estimation algorithms.
+      We formalize the joint regression task of predicting the magnitude of signals as well as the time delay with respect to their driving phenomena. 
+      We call the problem \emph{probabilistic dynamic time lag} (PDT); to emphasize the uncertain and non-stationary time delay between the occurrence of 
+      causes/drivers and the observation of effects in physical and man-made systems. We propose a solution to the PDT problem and a methodology to 
+      benchmark and evaluate probabilistic time lag estimation algorithms.
 \end{abstract}
 
 \section{Introduction}
@@ -129,9 +127,9 @@ Our work has the following novel characteristics as compared to the DTW paradigm
 
 \section{Problem Formulation}\label{sec:formulation}
 
-\subsection{CDT: Formulation}
+\subsection{Time Lag Inference}
 
-\emph{Causal Dynamic Time Lag} (CDT) is essentially a regression problem with two tasks. 
+Time lag inference is essentially a regression problem with two tasks. 
 Given two time series, the causes $x(t)$ and the observed effects $y(t)$, the regression model 
 must learn a mapping $f(.)$ which maps each input pattern $x(t_1)$ to an output $y(t_2)$, and a 
 mapping $g(.)$ which maps the time delay between the input and output patterns $t_2 = t_1 + g(x(t_1))$. 
@@ -151,7 +149,7 @@ $x(t)\in \mathcal{X}$ is possibly high dimensional and contains the hidden cause
 the effect $y(t)\in\mathbb{R}$ which is considered as a scalar in this paper. 
 $\Delta(t)\in \mathbb{R}^+$ represents the time delay between cause and effect.
 
-It is important to note some caveats about this causal time lag which make the CDT different from 
+It is important to note some caveats about this time lag which make the PDT different from 
 classical time series regression problems.
 
 In practical applications such as the motivating space weather example, $\Delta(t)$ is not recorded 
@@ -171,11 +169,11 @@ formulation of the problem presented here:
 The second assumption can be restrictive for applications in space physics, where fast moving 
 solar wind can reach the Earth before slow moving solar wind which departed before it. 
 
-\subsection{CDT: A Probabilistic Perspective}\label{sec:cdtprobform}
+\subsection{A Probabilistic Perspective}\label{sec:cdtprobform}
 
-It is an interesting exercise to consider casting the CDT problem in a probabilistic framework.
+It is an interesting exercise to consider casting the time lag inference problem in a probabilistic framework.
 As we shall see below, a probabilistic formualtion will lead us to a possible solution method
-for the CDT problem. 
+for the PDT problem. 
 
 \begin{align} \label{eq:cdtprob}
       &y(t) = \int_{0}^{\infty}{f[x(t - \tau)] \rho(t, \tau, x(t - \tau))}d \tau \\
@@ -183,16 +181,16 @@ for the CDT problem.
 \end{align}
 
 In \ref{eq:cdtprob}, we express the output time series $y(t)$ as a convolution between
-the output mapping $f(.)$ from section \ref{sec:formulation} and a \emph{causal probability}
+the output mapping $f(.)$ from section \ref{sec:formulation} and a \emph{time-lag probability}
 distribution $\rho(t, \tau, x(t - \tau))$. 
 
-The \emph{causal probability distribution} $\rho(t, \tau, x(t - \tau))$ expresses the probability 
-that $y(t)$ is caused by $x(t - \tau)$. The quantity $\tau$ is thus the \emph{causal time lag}. 
+The \emph{time-lag probability distribution} $\rho(t, \tau, x(t - \tau))$ expresses the probability 
+that $y(t)$ is caused by $x(t - \tau)$. The quantity $\tau$ is thus the time lag. 
 As cause is assumed to preceed effect, the time lag is assumed to be strictly positive ($\tau \geq 0$). 
-The support of the \emph{causal probability} distribution is thus $\mathbb{R}^+$.
+The support of the \emph{time-lag probability} distribution is thus $\mathbb{R}^+$.
 
 In order to recover the relationships in equations \ref{eq:pb1} and \ref{eq:pb2}, we 
-set the \emph{causal probability} distribution to the dirac delta function centered
+set the \emph{time-lag probability} distribution to the dirac delta function centered
 around $g[x(t - \tau)]$.
 
 
@@ -216,7 +214,7 @@ with $\sigma^2$ a default variance and $\alpha_{ij}\ge 0$ a matrix of non-negati
 This is a local mixture model function of the input variable $x$.
 The meaning of this is the following: for a given cause $x$ the effect
 $y_i$ at horizon $i$ has a normal distribution centered on $\hat y_i(x)$ with  variance $\sigma_i^2({\bf \tau})$ independent of $x$ as a simplifying assumption. $\{\tau_1,\ldots,\tau_n\}$ is a set of binary
-latent variables encoding the stochastic causal time lag, by telling whether $x$ causes $y_i$ ($\tau_i=1$) or not ($\tau_i=0$). Since we expect a one to one correspondence between causes
+latent variables encoding the stochastic time lag, by telling whether $x$ causes $y_i$ ($\tau_i=1$) or not ($\tau_i=0$). Since we expect a one to one correspondence between causes
 $x_t$ and effect $y_{t+\tau(t)}$ we impose the constraint
 \begin{equation}\label{eq:cs1}
 \sum_{i=1}^n \tau_i = 1,
@@ -396,18 +394,18 @@ $\hat p_i(x,{\bf y}) = p(\tau_i=1\vert x,y)$ being given in~(\ref{eq:hatpi}).
 
 \section{Proposed Solution}\label{sec:model}
 
-From section \ref{sec:cdtprobform}, we can express the probabilistic CDT regression 
+From section \ref{sec:cdtprobform}, we can express the probabilistic PDT regression 
 problem as the learning of two tasks.
 
 \begin{enumerate}
     \item Generate accurate predictions for $y(t + \tau)$
-    \item Learn the \emph{causal probability} distribution $\rho(t + \tau, \tau, x(t))$.
+    \item Learn the \emph{time-lag probability} distribution $\rho(t + \tau, \tau, x(t))$.
 \end{enumerate}
 
 The model therefore must consist of two estimators:
 \begin{inparaenum}[1.]
       \item Output $\hat{y}(t + \tau)$
-      \item Causal probability $\hat{p}(t + \tau, x(t))$.
+      \item Time lag probability $\hat{p}(t + \tau, x(t))$.
 \end{inparaenum} 
 We have access to measurements of the output time series $y(t)$, but that is 
 generally not the case for the time lag structure. Although it is possible 
@@ -416,7 +414,7 @@ this is not the norm.
 
 \subsection{Causal Time Lag Risk Functional}
 
-We now propose a \emph{causal time lag risk functional} 
+We now propose a \emph{time lag risk functional} 
 (equation \ref{eq:cdtfunc}):
 
 \begin{align}\label{eq:cdtfunc}
@@ -447,16 +445,16 @@ $\mathbf{\pi}_{x(t)}$ is a measure over the input space $\mathcal{X}$.
 \end{align}
 
 We want to avoid the situation where the model cherry picks one of the outputs 
-$j$ in the causal time window and concentrates most of the predictive 
+$j$ in the time window and concentrates most of the predictive 
 distribution $\hat p^{(m)}$ around the time index $j$. The factor 
 $(1 + \alpha \hat p_i^{(m)})$ instead of $\hat p_i^{(m)}$ in the first term 
 contributes to avoid this cherry picking effect. It forces the model to 
 generate well performing predictions for the entire causal window and then 
 move its predictive distribution to peak around the most predictable time index.
 
-\subsection{Causal Divergence}
+\subsection{Divergence}
 
-It is important to penalize the model's causal time lag predictive distribution 
+It is important to penalize the model's time lag predictive distribution 
 $\hat{p}(x(t))$ so that the model learns the time lag structure inherent in the 
 training data.
 
@@ -481,7 +479,7 @@ paper is general in nature.
 &\nonumber \hat{p}(t + \tau, x(t)) \ log \left( \frac{\hat{p}(t + \tau, x(t))}{\tilde{p}(t + \tau, x(t))}\right)
 \end{align}
 
-\subsection{Causal Probability Estimator}
+\subsection{Time Lag Probability Estimator}
 
 By variationally expansion, we can compute $\hat{p}(t + \tau, x(t))$ which optimizes the risk functinal in 
 equation \ref{eq:cdtfunc}.
@@ -509,7 +507,7 @@ series $x(t)$ and $y(t)$. The time delay function $g(.)$ can now be recast as a 
 every input pattern $x(t_i)$, returns a time delay $\delta$ corresponding to the time step 
 $t_i + \delta$ when,the effect $y(t_i + \delta)$ is observed.
 
-For practical purposes one must define for every time step $t$, a \emph{causal time window} 
+For practical purposes one must define for every time step $t$, a \emph{time window} 
 $[t+\ell, t+\ell+h)$, within which the model searches for probable temporal causal links. 
 Instead of predicting $\delta \in [\ell, \ell+h)$, one can provide a predictive distribution 
 over the causal time interval.
@@ -567,7 +565,7 @@ around its peak.
 
 \section{Hyper-parameters}
 
-Hyper-parameter selection is an important part of the model training process in the CDT problem. 
+Hyper-parameter selection is an important part of the model training process in the PDT problem. 
 The hyper-parameter selection problem in deep learning has received much attention and a number 
 of methodologies have been proposed for tacking it. 
 
@@ -588,7 +586,7 @@ Our proposed model has two classes of hyper-parameters which we discuss below.
 
 \subsection{Loss Function}
 
-These quantitites $\lambda_1, \lambda_2, \alpha, \beta$ are specific to the CDT loss function in equation 
+These quantitites $\lambda_1, \lambda_2, \alpha, \beta$ are specific to the PDT loss function in equation 
 \ref{eq:loss}. 
 
 \begin{enumerate}
@@ -633,9 +631,9 @@ two hidden layers, for prediction of outputs and time lags.
 
 
 Just as the MNIST, CIFAR Santa Fe Laser and other data sets serve as a way to evaluate machine learning 
-algorithms, it is necessary to propose benchmark problems for \emph{causal dynamic time lag}.
+algorithms, it is necessary to propose benchmark problems for \emph{Probabilistic Dynamic Time Lag}.
 
-This is particularly challenging given the nature of the CDT problem, although causal time lag 
+This is particularly challenging given the nature of the PDT problem, although time lag 
 relationships do exist in real world data sets (\cite{doi:10.1002/jgra.50429}, \cite{ZHOU2006195}), 
 it is difficult to find data sets with time lag relationships explicitly annotated.
 
@@ -643,9 +641,9 @@ This barrier can be surpassed in turn by careful construction of synthetic data 
 dynamic time lag relationships between causes and effects with various complexity.
 
 Synthetic data sets allow us to evaluate the accuracy of both, the output and time lag predictions of 
-CDT models. To this end, we propose four benchmark tests, which are motivated by their connection 
+PDT models. To this end, we propose four benchmark tests, which are motivated by their connection 
 to the solar wind prediction problem, but which we hope can become canonical examples in the area 
-of CDT modelling.
+of PDT modelling.
 
 \subsection{Data Generation}
 
@@ -660,7 +658,7 @@ equation \ref{eq:data}.
 \end{align}
 
 In equation \ref{eq:outputs} we define the output $y(.)$ as the square norm of the appropriately 
-time lagged input, where $\Delta(t)$ determines the causal time lag relationship.
+time lagged input, where $\Delta(t)$ determines the time lag relationship.
 
 \subsection{Generating Predictions}
 
@@ -882,7 +880,7 @@ we can see that the time lag errors are symmetric.
 
 We present in this work a formulation and a novel solution methodology for the problem of performing 
 inference and forecasting in the context of lagged causal relationships between time series. 
-We call this problem \emph{Causal Dynamic Time Lag} (CDT) to note the non-stationary nature of the 
+We call this problem \emph{Probabilistic Dynamic Time Lag} (PDT) to note the non-stationary nature of the 
 causal link between time series $x(t)$ and $y(t)$. We outline a neural network based solution to this 
 problem and benchmark its performance on a set of carefully constructed problems.
 
