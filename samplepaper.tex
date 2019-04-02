@@ -276,8 +276,6 @@ The parameters of the model can be optimized to yield the following natural esti
 \end{equation}
 (the optimization of $\sigma$ does not yield an independent equation).
 These are implicit equations, since $\hat {\bf p}(x,{\bf y})$ depends on the parameters $\sigma^2$ and $\alpha_{ij}$.
-%which can be solved by alternatively updating $\hat {\bf p}$
-%and the parameters through equations~(\ref{eq:hatpi}) and~(\ref{eq:var}).
 
 Finally note that $\tilde p$ is also subject of being optimized. We have
 \[
@@ -288,8 +286,8 @@ with $\lambda(x)$ a Lagrange multiplier to insure that $\sum_i\tilde p_i(x)=1$ f
 \tilde p_i(x) = {\mathbb E}_{data,y}\Bigl[\hat p_i(x,{\bf y})\Bigr].
 \end{equation}
 
-RQ3: Symmetry on the prior $\tilde p$.
-
+Practically these saddle point equations can be solved by alternatively updating $\tilde {\bf p}$
+and the parameters through equations~(\ref{eq:hatpi}) and~(\ref{eq:var}).
 
 \subsection{Linear stability analysis}
 With a flat prior $\tilde p_i(x) = 1/n$ there is a degenerate solution to these saddle point equations.
@@ -361,10 +359,10 @@ The opposite situation occurs when the trace of $H$ is negative and the determin
 \[
 C_2 < 2\bigl(1+\frac{1}{n}\bigr).
 \]
-In words this means that variance among the temporal channels of the predictors errors has to be twice the squared variance 
-of the errors to start to see something detected.
+In practice this threshold is always fulfilled which means that the degenerate point is always unstable.
 
-\subsection{Loss function and associated optimal predictor}
+
+\subsection{Loss function and related optimal predictor}
 Once the set $\hat {\bf y}(x)$ of predictors is learned and assuming that the correct parameters for~(\ref{eq:py}) have been found
 we would like to know given $x$, what is the optimal predictor for $y_i(x)$. Any predictor has  to come in a composite form
 $\hat z(x) = (\hat y(x),\hat I(x))$ where $\hat I(x)$ is the predicted index and $\hat y(x)$ the predicted value.
@@ -375,16 +373,43 @@ which we specify as an $L_2$ norm:
 \]
 Then we have the following statement:
 \begin{prop}
-Based on~(\ref{eq:py}), the optimal composite predictor $(y^\star,I^\star)$ is given by
+Based on~(\ref{eq:py}), with $\alpha_{ij} = \alpha\delta_{ij},\ \alpha>0$, the optimal composite predictor $(y^\star,I^\star)$ is given by
 \[
-y^\star(x) = \hat y_{\hat I(x)}(x)\qquad\text{with}\qquad I^\star(x) = \argmax_{i} \bigl(\hat p_i(x)\bigr), 
+y^\star(x) = \hat y_{I^\star(x)}(x)\qquad\text{with}\qquad I^\star(x) = \argmax_{i} \bigl(\tilde p_i(x)\bigr), 
 \]
-where
-\[
-\hat p_i(x) = {\mathbb E}_y\Bigl[\hat p_i(x,{\bf y})\Bigr],
-\]
-$\hat p_i(x,{\bf y}) = p(\tau_i=1\vert x,y)$ being given in~(\ref{eq:hatpi}). 
 \end{prop}
+\begin{proof}
+Given $\hat I(x)$ a candidate index function we associate the point-like measure
+\[
+\hat p_i(x) = \delta_{i\hat I(x)}.
+\]
+Written in terms of $\hat p$ the loss function reads
+\[
+{\cal L}(\hat y,\hat p) = {\mathbb E}_{x,{\bf y}}\Bigl[\sum_{i=1}^n \hat p_i(x)\bigl(y_i-\hat y(x)\bigr)^2\Bigr].
+\]
+Under~(\ref{eq:py}) (with $\alpha_{ij}=\alpha\delta_{ij}$) the loss is equal to
+\[
+{\cal L}(\hat y,\hat p) = {\mathbb E}_x\Bigl[\sum_{i=1}^n \hat p_i(x)\Bigl( \bigl(\hat y_i(x)-\hat y(x)\bigr)^2-\tilde p_i(x)\frac{\alpha\sigma^2}{1+\alpha}\Bigr)\Bigr]+\sigma^2
+\]
+The minimization w.r.t. $\hat y$ yields
+\begin{equation}\label{eq:hy}
+\hat y(x) = \sum_{i=1}^n \hat p_i(x)\hat y_i(x).
+\end{equation}
+In turn, as a function of $\hat p_i$ the loss being a  convex combination, its minimization yields
+\begin{align}
+  \hat p_i(x) &= \delta_{i\hat I(x)},\label{eq:hp}\\[0.2cm]
+  \hat I(x) &= \argmin_i\Bigl(\bigl(\hat y_i(x)-\hat y(x)\bigr)^2-\tilde p_i(x)\frac{\alpha\sigma^2}{1+\alpha}\Bigr).\label{eq:hI}
+\end{align}
+Combining these equations~(\ref{eq:hy},\ref{eq:hp},\ref{eq:hI}) we get
+\[
+  \hat I(x) = \argmax_i\bigl(\tilde p_i(x)\bigr),
+\]
+which concludes the proof.  
+\end{proof}
+
+Since $\tilde {\bf p}$ is self-consistently determined by~(\ref{eq:tildep}) along with equation~(\ref{eq:var}), what is needed from the practical point of view is to be able
+to solve two  regression problems, namely $\hat {\bf y}(x)$ and $\tilde {\bf p}(x)$ from a set of observations $\{(x^{m},{\bf y}^{m})\}$ with a given set of parameters ${\bf \alpha}$
+and $\sigma^2$.
 
 
 
