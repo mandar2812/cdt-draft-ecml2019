@@ -635,9 +635,10 @@ generates two sets of predictions, i.e. ${\hat{y}_i}$, output estimates and prob
 for the time window $i \in [t+\ell, t+\ell+h)$ of width $h$. In all of the following benchmarks we set 
 $\ell = 0$ and $h = 20$.
 
-In order to evaluate the model predictions for the benchmarks, we choose the prediction $\hat{y}_j$ 
-which has the highest probability of a causal link $j = {argmax}_{i} \ \hat{p}_i \ \ i \in [t+\ell, t+\ell+h)$. 
-The predictions $(\hat{y}_j, j)$ can now be compared to their corresponding ground truth values 
+To evaluate the model predictions for the benchmarks, we choose the 
+prediction $\hat{y}_j$ which has the highest probability of a causal link 
+$j = {argmax}_{i} \ \hat{p}_i \ \ i \in [t+\ell, t+\ell+h)$. The predictions 
+$(\hat{y}_j, j)$ can now be compared to their corresponding ground truth values 
 $(y(t + \Delta(t)), \Delta(t))$. 
 
 When generating predictions for temporally successive test patters $x'(t)$, it is possible that our 
