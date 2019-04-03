@@ -125,7 +125,7 @@ Our work has the following novel characteristics as compared to the DTW paradigm
 \end{enumerate}
 
 
-\section{Problem Formulation}\label{sec:formulation}
+\section{Continuous Time Formulation}\label{sec:formulation}
 
 \subsection{Time Lag Inference}
 
@@ -192,6 +192,14 @@ The support of the \emph{time-lag probability} distribution is thus $\mathbb{R}^
 In order to recover the relationships in equations \ref{eq:pb1} and \ref{eq:pb2}, we 
 set the \emph{time-lag probability} distribution to the dirac delta function centered
 around $g[x(t - \tau)]$.
+
+
+\section{Discrete Formulation}
+
+In practical time-series applications, one works with sub-sampled or discretized versions of the time 
+series $x(t)$ and $y(t)$. The time delay distribution $\rho(t, \tau, x(t - \tau))$ can now be recast as 
+a discrete probability distribution 
+
 
 
 \subsection{Likelihood formulation in the discrete case}
@@ -419,54 +427,49 @@ and $\sigma^2$.
 
 \section{Proposed Solution}\label{sec:model}
 
-From section \ref{sec:cdtprobform}, we can express the probabilistic PDT regression 
-problem as the learning of two tasks.
+For practical purposes one must define for every time step $t$, a \emph{time window} 
+$[t+\ell, t+\ell+h)$, within which the model searches for probable temporal causal links. 
+Instead of predicting $\delta \in [\ell, \ell+h)$, one can provide a predictive distribution 
+over the causal time interval.
+
+Our proposed model thus produces for a given input $x(t)$ at time $t$ the following predictions:
 
 \begin{enumerate}
-    \item Generate accurate predictions for $y(t + \tau)$
-    \item Learn the \emph{time-lag probability} distribution $\rho(t + \tau, \tau, x(t))$.
+\item Targets $\hat{y}(t+\ell), \cdots, \hat{y}(t+\ell+h-1)$
+\item Time Lag Probabilities $\hat{p}(t+\ell), \cdots, \hat{p}(t+\ell+h-1)$
 \end{enumerate}
 
-The model therefore must consist of two estimators:
-\begin{inparaenum}[1.]
-      \item Output $\hat{y}(t + \tau)$
-      \item Time lag probability $\hat{p}(t + \tau, x(t))$.
-\end{inparaenum} 
-We have access to measurements of the output time series $y(t)$, but that is 
-generally not the case for the time lag structure. Although it is possible 
-that certain data sets may have patterns annotated with time lag information, 
-this is not the norm.
+The model thus tries to learn a predictor for each lagged output $y(t+i)$ in the causal window 
+$[t+\ell, t+\ell+h)$, and simultaneously supplies a probability distribution over each time step 
+of the causal window, $\hat{p}(t+i)$.
 
-\subsection{Causal Time Lag Risk Functional}
+The distribution $\hat{p}(t+i), i \in {\ell, \cdots, \ell+h-1}$ represents the 
+likelihood of a causal link between $x(t)$ and $y(t+i)$. Since the model looks
+for causal links in the finite window $[t+\ell, t+\ell+h)$, we have 
+$\sum^{\ell+h-1}_{i = \ell}{\hat{p}(t + i)} = 1$.
 
-We now propose a \emph{time lag risk functional} 
-(equation \ref{eq:cdtfunc}):
 
-\begin{align}\label{eq:cdtfunc}
-&\mathcal{J}(\hat{y}, \hat{p}, \tilde{p}; x, y) = \\
-&\nonumber \lambda_1 \int_{\mathcal{X}}{
-      \int_{0}^{\infty}{
-            \mathcal{L}(y(t + \tau), \hat{y}(t + \tau, x(t))
-      }
-}d\tau d\mathbf{\pi}_{x(t)} \\ 
-& \nonumber \hspace{78pt}  + \\ 
-&\nonumber  \lambda_2 \int_{\mathcal{X}}{\int_{0}^{\infty}
-{\mathcal{H}\left(\hat{p}(t + \tau, x(t)), \tilde{p}(t + \tau, x(t))\right)}}d\tau d\mathbf{\pi}_{x(t)}
-\end{align}
+\subsection{Loss Function}
 
-The first term, weighted with parameter $\lambda_1$, consists of an 
-error metric. The second term, weighted with parameter $\lambda_2$ has to 
-penalize the predicted probabilities $\hat{p}$ in a meaningful manner. 
-$\mathbf{\pi}_{x(t)}$ is a measure over the input space $\mathcal{X}$.
+\begin{equation}\label{eq:loss}
+\begin{aligned}
+\mathcal{J}(y^{(1:M)}, &\hat{y}^{(1:M)}, \hat{p}^{(1:M)}) =\\ 
+& \sum_{i,m}{\frac{1}{2M} (y^{(m)}_{i} - \hat{y}^{(m)}_{i})^2 (1 + \alpha \hat{p}^{(m)}_i)} \\ 
++ &\lambda \frac{1}{M} \sum_{m = 1}^{M}{\sum_{i}{\hat{p}^{(m)}_{i}log \left (\frac{\hat{p}^{(m)}_i}{\tilde{p}^{(m)}_i} \right)}}
+\end{aligned}
+\end{equation}
+      
 
+The above loss function is computed over a mini-batch of size $M$, the indices $i$ denote the
+individual components of each prediction, while $m$ refers to data sample indices within the
+mini-batch in question.
 
 \subsection{Weighted Error}
 
 
 \begin{align}\label{eq:errorfunc}
-&\mathcal{L}(y(t + \tau), \hat{y}(t + \tau, x(t))) = \\ 
-\nonumber &\left (y(t + \tau) - \hat{y}(t + \tau, x(t)) \right)^2 
-(1 + \alpha \hat{p}(t + \tau, x(t)))
+&\mathcal{L}(y^{(1:M)}, \hat{y}^{(1:M)}, \hat{p}^{(1:M)}) =\\ 
+& \sum_{i,m}{\frac{1}{2M} (y^{(m)}_{i} - \hat{y}^{(m)}_{i})^2 (1 + \alpha \hat{p}^{(m)}_i)}
 \end{align}
 
 We want to avoid the situation where the model cherry picks one of the outputs 
@@ -500,74 +503,9 @@ divergence/distance measures as a penalty, since the work outlined in this
 paper is general in nature.
 
 \begin{align}\label{eq:causaldiv}
-&\mathcal{H}\left(\hat{p}(t + \tau, x(t)), \tilde{p}(t + \tau, x(t))\right) = \\
-&\nonumber \hat{p}(t + \tau, x(t)) \ log \left( \frac{\hat{p}(t + \tau, x(t))}{\tilde{p}(t + \tau, x(t))}\right)
+&\mathcal{H}\left(\hat{p}^{(1:M)}, \tilde{p}^{(1:M)} \right) = \\
+&\nonumber \frac{1}{M} \sum_{m = 1}^{M}{\sum_{i}{\hat{p}^{(m)}_{i}log \left (\frac{\hat{p}^{(m)}_i}{\tilde{p}^{(m)}_i} \right)}}
 \end{align}
-
-\subsection{Time Lag Probability Estimator}
-
-By variationally expansion, we can compute $\hat{p}(t + \tau, x(t))$ which optimizes the risk functinal in 
-equation \ref{eq:cdtfunc}.
-
-\begin{align}
-      \mathcal{J}(\hat{y}, \hat{p} + \delta \hat{p}, \tilde{p}; x, y) = 
-      \mathcal{J}(\hat{y}, \hat{p}, \tilde{p}; x, y) + 
-      \int_a^b \frac{\delta \mathcal{J}}{\delta \hat{p}} {\delta p} \ dx
-\end{align}
-
-
-\section{Discrete Formulation}
-
-Our proposed approach works with discrete analogue of the time series $x(t), y(t)$ 
-and does not explicitly enforce assumptions 1 or 2, but instead tries to learn an 
-estimator which for every input $x(t)$, returns an output and time lag estimation. 
-This enables us to benefit from batch wise stochastic gradient learning methods and 
-make our method scalable to larger data sets \footnote{Another possible approach which 
-naturally come to mind, consists in to alternatively optimize $f$ and $g$ by using a 
-DTW routine in the loop. This however would be far more expensive and not 
-really scalable to large datasets.}.
-
-In practical time-series applications, one works with sub-sampled or discretized versions of the time 
-series $x(t)$ and $y(t)$. The time delay function $g(.)$ can now be recast as a function which for 
-every input pattern $x(t_i)$, returns a time delay $\delta$ corresponding to the time step 
-$t_i + \delta$ when,the effect $y(t_i + \delta)$ is observed.
-
-For practical purposes one must define for every time step $t$, a \emph{time window} 
-$[t+\ell, t+\ell+h)$, within which the model searches for probable temporal causal links. 
-Instead of predicting $\delta \in [\ell, \ell+h)$, one can provide a predictive distribution 
-over the causal time interval.
-
-Our proposed model thus produces for a given input $x(t)$ at time $t$ the following predictions:
-
-\begin{enumerate}
-\item Targets $\hat{y}(t+\ell), \cdots, \hat{y}(t+\ell+h-1)$
-\item Time Lag Probabilities $\hat{p}(t+\ell), \cdots, \hat{p}(t+\ell+h-1)$
-\end{enumerate}
-
-The model thus tries to learn a predictor for each lagged output $y(t+i)$ in the causal window 
-$[t+\ell, t+\ell+h)$, and simultaneously supplies a probability distribution over each time step 
-of the causal window, $\hat{p}(t+i)$.
-
-The distribution $\hat{p}(t+i), i \in {\ell, \cdots, \ell+h-1}$ represents the 
-likelihood of a causal link between $x(t)$ and $y(t+i)$. Since the model looks
-for causal links in the finite window $[t+\ell, t+\ell+h)$, we have 
-$\sum^{\ell+h-1}_{i = \ell}{\hat{p}(t + i)} = 1$.
-
-
-\subsection{Loss Function}
-
-\begin{equation}\label{eq:loss}
-\begin{aligned}
-\mathcal{J}(y^{(1:M)}, &\hat{y}^{(1:M)}, \hat{p}^{(1:M)}) =\\ 
-&\lambda_1 \sum_{i,m}{\frac{1}{2M} (y^{(m)}_{i} - \hat{y}^{(m)}_{i})^2 (1 + \alpha \hat{p}^{(m)}_i)} \\ 
-+ &\lambda_2 \frac{1}{M} \sum_{m = 1}^{M}{\sum_{i}{\hat{p}^{(m)}_{i}log \left (\frac{\hat{p}^{(m)}_i}{\tilde{p}^{(m)}_i} \right)}}
-\end{aligned}
-\end{equation}
-      
-
-The above loss function is computed over a mini-batch of size $M$, the indices $i$ denote the
-individual components of each prediction, while $m$ refers to data sample indices within the
-mini-batch in question.
 
 
 \subsection{Target Probability}\label{sec:targetprob}
@@ -586,6 +524,9 @@ $\beta$.
 
 The hyper-parameter $\beta$ serves to determine how sharp the target probability distribution is 
 around its peak.
+
+
+
 
 
 \section{Hyper-parameters}
