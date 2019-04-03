@@ -61,7 +61,9 @@ Michele Sebag\inst{2}
 % If there are more than two authors, 'et al.' is used.
 %
 \institute{Centrum Wiskunde en Informatica, Amsterdam 1098XG, Netherlands \and
-TAO, CNRS $-$ INRIA $-$ Univ. Paris-Saclay, France\and
+Laboratoire de Recherche en Informatique,
+Bât 660 Université Paris-Sud 11,
+91405 Orsay Cedex France \and
 CIRES, University of Colorado, Boulder, CO, USA}
 %
 \maketitle              % typeset the header of the contribution
@@ -73,7 +75,61 @@ CIRES, University of Colorado, Boulder, CO, USA}
       benchmark and evaluate probabilistic time lag estimation algorithms.
 \end{abstract}
 
-\input{introduction}
+\section{Introduction}
+Exploiting causal relationship between time series is a problem of practical importance 
+with many domains of application. Of similar importance is causal relationship between processes. 
+Although rigorous understanding and identification of causal links between arbitrary quantities 
+is an elusive question, for certain situations it is well known that some causal relationship 
+must exist. 
+
+Some of the seminal work relating to causality in time series data is found in \cite{Granger}, 
+which introduced the concept of \emph{Granger Causality}. \emph{Granger causality} focused on the 
+problem of predictive causality instead of the philosophical or \emph{true causality}. Although 
+originally formulated for linear causal relationships with no latent variables, it has since been 
+extended for various situations (see \cite{doi:10.1002/9781119945710.ch22} for a review).
+
+In temporal phenomena, it is also the case that causal effects of events are not immediately observed, 
+but after a certain time interval which can be dynamic. One prominent example of such behavior is the
+ Sun-Earth system and its associated problem of space weather forecasting.
+
+The Sun, a perennial source of charged energetic particles ejects them into the surrounding space. 
+This particle cloud or \emph{solar wind} reaches the Earth's vicinity and interacts with its 
+magnetic field in complex ways, giving rise to geomagnetic phenomena. High speed solar wind can 
+potentially cause damage to under sea pipelines, satellites, and other telecommunication 
+infrastructure. A key prediction task is to forecast the speed of the \emph{solar wind} in 
+the vicinity of the Earth from solar image data 
+(\cite{doi:10.1002/jgra.50429}, \cite{doi:10.1029/2009SW000542}).
+
+The \emph{solar wind} forecasting problem can be broken down into two stages. First, the extraction of 
+features from solar images and second, the prediction of time lagged solar wind speed near the Earth. 
+In this work we present progress made on the second part of this problem.
+ 
+To our knowledge, the problem of regression with hidden non-constant time delay, as formulated later in 
+section \ref{sec:formulation} has not been addressed in the machine learning literature. 
+
+Similar type of problems have actually been encountered in the context of financial time series 
+prediction in \cite{ZHOU2006195} for instance. Their approach is a form a dynamical time warping (DTW) 
+which appeared originally in the context of speech recognition~\cite{SakoeShiba1978}. 
+\cite{SignalDiffusion} build on the DTW paradigm and take a Bayesian approach to the temporal alignment 
+problem between time series. However they limit themselves to linear relationships between 
+the input and output time series, assuming in addition slow varying time lags.
+
+The DTW algorithm and its variants are now widely used in time series analysis, but they always assume 
+a predefined cost matrix for the temporal alignment between two time series and they assume the 
+causes $x(t)$ and effects $y(t)$ are of same dimensionality and structure. 
+
+Our work has the following novel characteristics as compared to the DTW paradigm.
+
+\begin{enumerate}
+    \item Causes and effects are of different dimensionality. The output time series $y(t)$ is scalar, 
+          but its driver $x(t)$ is potentially high dimensional, e.g. vectors, images etc.
+    \item We do not make assumptions as made in \cite{ZHOU2006195} and other 
+          \emph{dynamic time warping} related works about the time lag function. 
+          In our case the time lag can be potentially non smooth.
+    \item The relationship between $x(t)$ and $y(t)$ can be potentially non-linear. 
+\end{enumerate}
+
+
 \section{Continuous Time Formulation}\label{sec:formulation}
 
 \subsection{Time Lag Inference}
