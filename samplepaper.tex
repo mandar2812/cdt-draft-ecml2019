@@ -7,7 +7,7 @@
 \usepackage{paralist}
 \usepackage{graphicx}
 \usepackage{epstopdf}
-\epstopdfDeclareGraphicsRule{.pdf}{png}{.png}{convert #1 \OutputFile}
+%\epstopdfDeclareGraphicsRule{.pdf}{png}{.png}{convert #1 \OutputFile}
 \DeclareGraphicsExtensions{.pdf,.png}
 \usepackage{subcaption}
 \captionsetup{compatibility=false}
@@ -548,6 +548,7 @@ Bergstra \& Bengio \cite{randomsearchBengio} showed that random search can be an
 hyper-parameters in several problem domains, and serve as a good baseline which can enable 
 further improvement in model performance.
 
+
 In the current work, we employ random search for hyper-parameter selection. 
 Our proposed model has two classes of hyper-parameters which we discuss below.
 
@@ -692,37 +693,41 @@ achieves a MAE of $5.186521$ and a Pearson correlation of $0.991$ on this data s
 thus able to learn the input-output and time lag mappings easily for this problem.
 
 
-\begin{figure}[t!]
+\begin{figure*}
   \centering
-  \begin{subfigure}[t]{.5\linewidth}
-  \includegraphics[width=\linewidth]{figures/exp2_scatter_v_test}
-  \caption{\textbf{Problem II}, Goodness of fit, Output $y(x)$}\label{fig:problem2_fitv}
+
+  \begin{subfigure}[b]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/exp2_scatter_v_test}
+    \caption{ \textbf{Problem II}, Goodness of fit, Output $y(x)$}
+    \label{fig:problem2_fitv}
   \end{subfigure}
-  ~ 
-  \begin{subfigure}[t]{.5\linewidth}
-  \includegraphics[width=\linewidth]{figures/exp2_scatter_t_test}
-  \caption{\textbf{Problem II}, Goodness of fit, Timalag $\Delta(t)$ }\label{fig:problem2_fitt}
+  \hfill
+  \begin{subfigure}[b]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/exp2_scatter_t_test}
+    \caption{ \textbf{Problem II}, Goodness of fit, Timalag $\Delta(t)$ }
+    \label{fig:problem2_fitt}
   \end{subfigure}
-  \caption{\textbf{Problem II}, Ground truth vs Predictions}
-\end{figure}
+  \vskip\baselineskip
+  \begin{subfigure}[b]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/exp2_errors}
+    \caption{ \textbf{Problem II}, Error in prediction of output vs error in time lag prediction} 
+    \label{fig:problem2_error}
+  \end{subfigure}
+  \quad
+  \begin{subfigure}[b]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/exp2_predictive_curves}
+    \caption{ \textbf{Problem II}, Output vs Time Lag Relationship} 
+    \label{fig:problem2_curves}
+  \end{subfigure}
+  
+  \caption{\textbf{Problem II}, Results}
+\end{figure*}
 
 
-\begin{figure}[h]
-\vspace{.3in}
-\centerline{\includegraphics[width=0.5\textwidth]{figures/exp2_errors}}
-\vspace{.3in}
-\caption{\textbf{Problem II}, Error in prediction of output vs error in time lag prediction}
-\label{fig:problem2_error}
-\end{figure}
-
-
-\begin{figure}[h]
-\vspace{.3in}
-\centerline{\includegraphics[width=0.5\textwidth]{figures/exp2_predictive_curves}}
-\vspace{.3in}
-\caption{\textbf{Problem II}, Output vs Time Lag Relationship}
-\label{fig:problem2_curves}
-\end{figure}
 
 \begin{figure}[h]
 \vspace{.3in}
@@ -750,35 +755,39 @@ We can see that the model is able to approximate the inverse relationship betwee
 time lag from the training data.
 
 
-\begin{figure}[t!]
+\begin{figure*}
   \centering
-  \begin{subfigure}[b]{.5\linewidth}
-  \includegraphics[width=\linewidth]{figures/exp3_scatter_v_test}
-  \caption{\textbf{Problem III}, Goodness of fit, Output $y(x)$}\label{fig:problem3_fitv}
-  \end{subfigure}
-  ~
-  \begin{subfigure}[b]{.5\linewidth}
-  \includegraphics[width=\linewidth]{figures/exp3_scatter_t_test}
-  \caption{\textbf{Problem III}, Goodness of fit, Timalag $\Delta(t)$ }\label{fig:problem3_fitt}
-  \end{subfigure}
-  \caption{\textbf{Problem III}, Ground truth vs Predictions}
-\end{figure}
 
-\begin{figure}[h]
-\vspace{.3in}
-\centerline{\includegraphics[width=0.5\textwidth]{figures/exp3_errors}}
-\vspace{.3in}
-\caption{\textbf{Problem III}, Error in prediction of output vs error in time lag prediction}
-\label{fig:problem3_error}
-\end{figure}
-
-\begin{figure}[h]
-\vspace{.3in}
-\centerline{\includegraphics[width=0.5\textwidth]{figures/exp3_predictive_curves}}
-\vspace{.3in}
-\caption{\textbf{Problem III}, Output vs Time Lag Relationship}
-\label{fig:problem3_curves}
-\end{figure}
+  \begin{subfigure}[b]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/exp3_scatter_v_test}
+    \caption{ \textbf{Problem III}, Goodness of fit, Output $y(x)$}
+    \label{fig:problem3_fitv}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/exp3_scatter_t_test}
+    \caption{ \textbf{Problem III}, Goodness of fit, Time lag $\Delta(t)$ }
+    \label{fig:problem3_fitt}
+  \end{subfigure}
+  \vskip\baselineskip
+  \begin{subfigure}[b]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/exp3_errors}
+    \caption{ \textbf{Problem III}, Error in prediction of output vs error in time lag prediction} 
+    \label{fig:problem3_error}
+  \end{subfigure}
+  \quad
+  \begin{subfigure}[b]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/exp3_predictive_curves}
+    \caption{ \textbf{Problem III}, Output vs Time Lag Relationship} 
+    \label{fig:problem3_curves}
+  \end{subfigure}
+  
+  \caption{\textbf{Problem III}, Results}
+\end{figure*}
 
 
 \subsubsection{Problem III}
@@ -827,36 +836,46 @@ but when output and time lag are positively correlated, the time lag errors shou
 
 \subsubsection{Problem IV}
 
-Figures \ref{fig:problem4_scatter}, \ref{fig:problem4_error}, \ref{fig:problem4_curves} summarize 
+Figures \ref{fig:problem4_fitv}, \ref{fig:problem4_fitt}, \ref{fig:problem4_curves} summarize 
 the results of the experiment. This case is different as compared to the previous problems as there 
 is now a monotonic relationship between the output and time lag. A key difference in the model 
-performance in this problem can be observed in error scatter chart \ref{fig:problem4_error}, 
+performance in this problem can be observed in error scatter chart \ref{fig:problem4_curves}, 
 we can see that the time lag errors are symmetric.
 
 
-\begin{figure}[h]
-\vspace{.3in}
-\centerline{\includegraphics[width=0.5\textwidth]{figures/exp4_scatter_v_tl}}
-\vspace{.3in}
-\caption{\textbf{Problem IV}, Output-Time Lag Scatter plot; model predictions in red and actual data in black}
-\label{fig:problem4_scatter}
-\end{figure}
+\begin{figure*}
+  \centering
 
-\begin{figure}[h]
-\vspace{.3in}
-\centerline{\includegraphics[width=0.5\textwidth]{figures/exp4_errors}}
-\vspace{.3in}
-\caption{\textbf{Problem IV}, Error in prediction of output vs error in time lag prediction}
-\label{fig:problem4_error}
-\end{figure}
-
-\begin{figure}[h]
-\vspace{.3in}
-\centerline{\includegraphics[width=0.5\textwidth]{figures/exp4_predictive_curves}}
-\vspace{.3in}
-\caption{\textbf{Problem IV}, Output vs Time Lag Relationship}
-\label{fig:problem4_curves}
-\end{figure}
+  \begin{subfigure}[b]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/exp4_scatter_v_test}
+    \caption{ \textbf{Problem IV}, Goodness of fit, Output $y(x)$}
+    \label{fig:problem4_fitv}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/exp4_scatter_t_test}
+    \caption{ \textbf{Problem IV}, Goodness of fit, Time lag $\Delta(t)$ }
+    \label{fig:problem4_fitt}
+  \end{subfigure}
+  \vskip\baselineskip
+  \begin{subfigure}[b]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/exp4_errors}
+    \caption{ \textbf{Problem IV}, Error in prediction of output vs error in time lag prediction} 
+    \label{fig:problem4_error}
+  \end{subfigure}
+  \quad
+  \begin{subfigure}[b]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/exp4_predictive_curves}
+    \caption{ \textbf{Problem IV}, Output vs Time Lag Relationship} 
+    \label{fig:problem4_curves}
+  \end{subfigure}
+  
+  \caption{\textbf{Problem IV}, Results}
+\end{figure*}
 
 \section{Conclusions}
 
