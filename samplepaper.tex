@@ -710,7 +710,9 @@ thus able to learn the input-output and time lag mappings easily for this proble
     \caption{ \textbf{Problem II}, Goodness of fit, Timalag $\Delta(t)$ }
     \label{fig:problem2_fitt}
   \end{subfigure}
+  
   \vskip\baselineskip
+  
   \begin{subfigure}[b]{0.4\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/exp2_errors}
@@ -724,19 +726,26 @@ thus able to learn the input-output and time lag mappings easily for this proble
     \caption{ \textbf{Problem II}, Output vs Time Lag Relationship} 
     \label{fig:problem2_curves}
   \end{subfigure}
+
+  \vskip\baselineskip
+  
+  \begin{subfigure}[b]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/exp2_timeseries_pred}
+    \caption{ \textbf{Problem II}, A portion of the test time series reconstructed using the model} 
+    \label{fig:problem2_timeseries}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/exp2_lag_error_jus}
+    \caption{ \textbf{Problem II}, Predicted vs Actual Outputs for the cases with time lag error $\leq -2.5$.} 
+    \label{fig:problem2_lag_error_jus}
+  \end{subfigure}
   
   \caption{\textbf{Problem II}, Results}
 \end{figure*}
 
-
-
-\begin{figure}[h]
-\vspace{.3in}
-\centerline{\includegraphics[width=0.5\textwidth]{figures/exp2_timeseries_pred}}
-\vspace{.3in}
-\caption{\textbf{Problem II}, A portion of the test time series reconstructed using the model}
-\label{fig:problem2_timeseries}
-\end{figure}
 
 
 \subsubsection{Problem II}
@@ -772,7 +781,9 @@ time lag from the training data.
     \caption{ \textbf{Problem III}, Goodness of fit, Time lag $\Delta(t)$ }
     \label{fig:problem3_fitt}
   \end{subfigure}
+
   \vskip\baselineskip
+  
   \begin{subfigure}[b]{0.4\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/exp3_errors}
@@ -785,6 +796,22 @@ time lag from the training data.
     \includegraphics[width=\textwidth]{figures/exp3_predictive_curves}
     \caption{ \textbf{Problem III}, Output vs Time Lag Relationship} 
     \label{fig:problem3_curves}
+  \end{subfigure}
+  
+  \vskip\baselineskip
+  
+  \begin{subfigure}[b]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/exp3_timeseries_pred}
+    \caption{ \textbf{Problem III}, A portion of the test time series reconstructed using the model} 
+    \label{fig:problem3_timeseries}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/exp3_lag_error_jus}
+    \caption{ \textbf{Problem III}, Predicted vs Actual Outputs for the cases with time lag error $\leq -2.5$.} 
+    \label{fig:problem3_lag_error_jus}
   \end{subfigure}
   
   \caption{\textbf{Problem III}, Results}
@@ -808,15 +835,6 @@ the output space. %(table \ref{table:problem3_stats}).
 It is thus the case that for applications where there is an inverse relationship between the output 
 and time lag, the model's time lag errors are expected to be biased towards the negative region, 
 but when output and time lag are positively correlated, the time lag errors should be unbiased.
-
-\begin{figure}[h]
-\vspace{.3in}
-\centerline{\includegraphics[width=0.5\textwidth]{figures/exp3_lag_error_jus}}
-\vspace{.3in}
-\caption{\textbf{Problem III}, Predicted vs Actual Outputs for the cases with time lag error $\leq -2.5$.}
-\label{fig:problem3_lag_error_jus}
-\end{figure}
-
 
 
 %\begin{table}[h]
@@ -860,7 +878,9 @@ we can see that the time lag errors are symmetric.
     \caption{ \textbf{Problem IV}, Goodness of fit, Time lag $\Delta(t)$ }
     \label{fig:problem4_fitt}
   \end{subfigure}
+  
   \vskip\baselineskip
+  
   \begin{subfigure}[b]{0.4\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/exp4_errors}
