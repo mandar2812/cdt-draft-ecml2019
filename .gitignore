@@ -8,6 +8,7 @@
 *.bbl
 *.gz
 *.pdf
+!figures/*.pdf
 .metals
 *.fls
 *.fdb*
