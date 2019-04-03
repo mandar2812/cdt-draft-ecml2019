@@ -74,9 +74,7 @@ CIRES, University of Colorado, Boulder, CO, USA}
 \end{abstract}
 
 \input{introduction}
-\section{Continuous Time Formulation}\label{sec:formulation}
-
-\subsection{Time Lag Inference}
+\section{Deterministic Formulation}\label{sec:formulation}
 
 Time lag inference is essentially a regression problem with two tasks. 
 Given two time series, the causes $x(t)$ and the observed effects $y(t)$, the regression model 
@@ -96,66 +94,54 @@ g: \mathcal{X}  \rightarrow \mathbb{R}^{+},
 $t \in \mathbb{R}^{+}$ represents the continuous temporal domain. The input signal 
 $x(t)\in \mathcal{X}$ is possibly high dimensional and contains the hidden cause to 
 the effect $y(t)\in\mathbb{R}$ which is considered as a scalar in this paper. 
-$\Delta(t)\in \mathbb{R}^+$ represents the time delay between cause and effect.
+$\tau(t)\in \mathbb{R}^+$ represents the time delay between inputs and outputs.
 
-It is important to note some caveats about this time lag which make the PDT different from 
-classical time series regression problems.
+It is important to note some caveats about this time lag which make this inference problem 
+different from classical time series regression problems.
 
-In practical applications such as the motivating space weather example, $\Delta(t)$ is not recorded 
-explicitly in the data set. This makes model training and evaluation challenging.
+Firstly, the time lag $\tau(t)$ can be \emph{non-stationary} i.e. dependent on the input $x(t)$. 
+Secondly, in practical applications such as the motivating space weather example, $\tau(t)$ 
+is not recorded explicitly in the training data. This makes model training and evaluation 
+challenging.
 
-One may make certain assumptions on the time warping function $\phi(t) = t + g(x(t))$, in the general 
+One may make certain assumptions on the time warping function $\phi(t) = t + \tau(t)$, in the general 
 formulation of the problem presented here: 
 
 \begin{enumerate}
     \item $\phi(.)$ is assumed to be continuous and \emph{bijective}.
-    \item Zhou \& Sornette \cite{ZHOU2006195} enforce further assumptions such as 
-          $\phi(t_1) \leq \phi(t_2), \forall t_1 \leq t_2$, which are incorporated via constraints. 
-          This approach respects the properties associated with the warping function $\phi(.)$ but 
-          increase the computational complexity of the resulting optimization problem.
+    \item Zhou \& Sornette \cite{ZHOU2006195} enforce further assumptions 
+          such as $\phi(t_1) \leq \phi(t_2), \forall t_1 \leq t_2$, which 
+          are incorporated via constraints. This approach respects the 
+          properties associated with the warping function $\phi(.)$ but 
+          increase the computational complexity of the resulting 
+          optimization problem.
 \end{enumerate}
 
 The second assumption can be restrictive for applications in space physics, where fast moving 
 solar wind can reach the Earth before slow moving solar wind which departed before it. 
 
-\subsection{A Probabilistic Perspective}\label{sec:cdtprobform}
-
-It is an interesting exercise to consider casting the time lag inference problem in a probabilistic framework.
-As we shall see below, a probabilistic formualtion will lead us to a possible solution method
-for the PDT problem. 
-
-\begin{align} \label{eq:cdtprob}
-      &y(t) = \int_{0}^{\infty}{f[x(t - \tau)] \rho(t, \tau, x(t - \tau))}d \tau \\
-      & \nonumber \rho(t, \tau, x(t - \tau))  = \delta(\tau - g[x(t - \tau)])
-\end{align}
-
-In \ref{eq:cdtprob}, we express the output time series $y(t)$ as a convolution between
-the output mapping $f(.)$ from section \ref{sec:formulation} and a \emph{time-lag probability}
-distribution $\rho(t, \tau, x(t - \tau))$. 
-
-The \emph{time-lag probability distribution} $\rho(t, \tau, x(t - \tau))$ expresses the probability 
-that $y(t)$ is caused by $x(t - \tau)$. The quantity $\tau$ is thus the time lag. 
-As cause is assumed to preceed effect, the time lag is assumed to be strictly positive ($\tau \geq 0$). 
-The support of the \emph{time-lag probability} distribution is thus $\mathbb{R}^+$.
-
-In order to recover the relationships in equations \ref{eq:pb1} and \ref{eq:pb2}, we 
-set the \emph{time-lag probability} distribution to the dirac delta function centered
-around $g[x(t - \tau)]$.
-
-
-\section{Discrete Formulation}
-
 In practical time-series applications, one works with sub-sampled or discretized versions of the time 
-series $x(t)$ and $y(t)$. The time delay distribution $\rho(t, \tau, x(t - \tau))$ can now be recast as 
-a discrete probability distribution 
+series $x(t)$ and $y(t)$. In this case the map $g(.)$ is replaced by its discrete analogue 
+$g(.):\mathcal{X}  \rightarrow \mathbb{N}$. 
 
+Henceforth we will work with the discretized time series $x^m$ and $y^m$.
 
+\section{Probabilistic Formulation}
+
+Unlike the classical supervised learning problem, we cannot associate a time lagged output
+$y^{m + i}$ and input $x^m$ with absolute certainty. It is therefore beneficial to relax 
+the assumption of a deterministic time lag to a stochastic one.
 
 \subsection{Likelihood formulation in the discrete case}
-Suppose we discretize time in units of $\delta t$, such that for a given event $x^{(m)}$ at time  $t = m\ \delta t$, the possible time lag $\tau^{(m)}$ is within a window
-$[\tau_{min},\tau_{max}]$. This interval is as well discretized into $n = (\tau_{max}-\tau_{min})/\delta t $ intervals so that the effect if any of this event has to be found in the vector of size $n$ of
-possible effects denoted ${\bf y}^{(m)} = \{y_1^{(m)},\ldots,y_n^{(m)}\}$.
+
+Suppose we discretize time in units of $\delta t$, such that for a given event $x^{(m)}$ at time  
+$t = m\ \delta t$, the possible time lag $\tau^{(m)}$ is within a window $[\tau_{min},\tau_{max}]$. 
+This interval is as well discretized into $n = (\tau_{max}-\tau_{min})/\delta t $ intervals so that 
+the effect if any of this event has to be found in the vector of size $n$ of possible effects denoted 
+${\bf y}^{(m)} = \{y_1^{(m)},\ldots,y_n^{(m)}\}$.
+
 Our probabilistic formulation is given by the following conditional probability distribution:
+
 \begin{align}
   P\bigl[{\bf y}^{m} = {\bf y}\vert x^{(m)}=x\bigr] &= \nonumber\\[0.2cm]
   \sum_{\{\tau_i\in\{0,1\}\}} & \hat p\bigl(\tau_1,\ldots,\tau_n\vert x)
@@ -373,9 +359,9 @@ and $\sigma^2$ in order then to be able to iterate the saddle point equations.
 \section{Proposed Solution}\label{sec:model}
 
 For practical purposes one must define for every time step $t$, a \emph{time window} 
-$[t+\ell, t+\ell+h)$, within which the model searches for probable temporal causal links. 
+$[t+\ell, t+\ell+h)$, within which the model searches for probable temporal links. 
 Instead of predicting $\delta \in [\ell, \ell+h)$, one can provide a predictive distribution 
-over the causal time interval.
+over the time window.
 
 Our proposed model thus produces for a given input $x(t)$ at time $t$ the following predictions:
 
@@ -384,9 +370,9 @@ Our proposed model thus produces for a given input $x(t)$ at time $t$ the follow
 \item Time Lag Probabilities $\hat{p}(t+\ell), \cdots, \hat{p}(t+\ell+h-1)$
 \end{enumerate}
 
-The model thus tries to learn a predictor for each lagged output $y(t+i)$ in the causal window 
+The model thus tries to learn a predictor for each lagged output $y(t+i)$ in the time window 
 $[t+\ell, t+\ell+h)$, and simultaneously supplies a probability distribution over each time step 
-of the causal window, $\hat{p}(t+i)$.
+of the time window, $\hat{p}(t+i)$.
 
 The distribution $\hat{p}(t+i), i \in {\ell, \cdots, \ell+h-1}$ represents the 
 likelihood of a causal link between $x(t)$ and $y(t+i)$. Since the model looks
@@ -422,7 +408,7 @@ $j$ in the time window and concentrates most of the predictive
 distribution $\hat p^{(m)}$ around the time index $j$. The factor 
 $(1 + \alpha \hat p_i^{(m)})$ instead of $\hat p_i^{(m)}$ in the first term 
 contributes to avoid this cherry picking effect. It forces the model to 
-generate well performing predictions for the entire causal window and then 
+generate well performing predictions for the entire time window and then 
 move its predictive distribution to peak around the most predictable time index.
 
 \subsection{Divergence}
@@ -522,7 +508,7 @@ regularization constant.
 \section{Model Architecture}
 
 The choice of model architecture is constrained by only one condition, i.e. the number of neurons 
-in the output layer must be $2 \times h$ where $h$ is the chosen size of the causal window. 
+in the output layer must be $2 \times h$ where $h$ is the chosen size of the time window. 
 The composition and size of the layers preceding the output layer are dependent on the application, 
 one may choose \emph{convolutional layers} for input data which consists of images and fully connected 
 layers for vector data.
@@ -565,12 +551,12 @@ This can be achieved with good flexibility using \emph{Stochastic Langevin Dynam
 equation \ref{eq:data}.
 
 \begin{align}
- x(t+1) &= (1 - \tau) x(t) + \mathcal{N}(0, \sigma^2) \label{eq:data}\\
- y(t+\Delta(t)) &= \alpha ||x(t)||^2 \label{eq:outputs}
+ x(t + 1) &= (1 - \tau) x(t) + \mathcal{N}(0, \sigma^2) \label{eq:data}\\
+ y(t + \tau(t)) &= \alpha ||x(t)||^2 \label{eq:outputs}
 \end{align}
 
 In equation \ref{eq:outputs} we define the output $y(.)$ as the square norm of the appropriately 
-time lagged input, where $\Delta(t)$ determines the time lag relationship.
+time lagged input, where $\tau(t)$ determines the time lag relationship.
 
 \subsection{Generating Predictions}
 
@@ -583,7 +569,7 @@ To evaluate the model predictions for the benchmarks, we choose the
 prediction $\hat{y}_j$ which has the highest probability of a causal link 
 $j = {argmax}_{i} \ \hat{p}_i \ \ i \in [t+\ell, t+\ell+h)$. The predictions 
 $(\hat{y}_j, j)$ can now be compared to their corresponding ground truth values 
-$(y(t + \Delta(t)), \Delta(t))$. 
+$(y(t + \tau(t)), \tau(t))$. 
 
 When generating predictions for temporally successive test patters $x'(t)$, it is possible that our 
 model produces time gaps in the reconstruction of the test outputs $y'(t)$. This can happen due to 
@@ -597,16 +583,16 @@ Based on the above framework we construct four benchmark problems.
 
 \begin{enumerate}
 \item \textbf{Problem I} Constant Lag: \newline 
-$\Delta(t) = k$
+$\tau(t) = k$
 
 \item \textbf{Problem II} Constant Velocity $\alpha ||x(t)||^2 + c$; Fixed Distance $d$: 
-\newline $\Delta(t) = d/(\alpha ||x(t)||^2 + c),\ \alpha = \frac{100}{8},\ d = 1000,\ c = 40$
+\newline $\tau(t) = d/(\alpha ||x(t)||^2 + c),\ \alpha = \frac{100}{8},\ d = 1000,\ c = 40$
 
 \item \textbf{Problem III} Constant Acceleration $a$; Fixed Distance $d$: 
-\newline $\Delta(t) = (\sqrt{\alpha^2||x(t)||^4 + 2ad} - \alpha||x(t)||^2)/a,\ \alpha = \frac{50}{8},\ a = 5,\ d = 1000$
+\newline $\tau(t) = (\sqrt{\alpha^2||x(t)||^4 + 2ad} - \alpha||x(t)||^2)/a,\ \alpha = \frac{50}{8},\ a = 5,\ d = 1000$
 
 \item \textbf{Problem IV} Softplus time lag: 
-\newline $\Delta(t) = exp\left(||x(t)||^2\right)/\left(1 + exp(||x(t)||^2)\right)$
+\newline $\tau(t) = exp\left(||x(t)||^2\right)/\left(1 + exp(||x(t)||^2)\right)$
 
 \end{enumerate}
 
@@ -651,7 +637,7 @@ thus able to learn the input-output and time lag mappings easily for this proble
   \begin{subfigure}[b]{0.4\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/exp2_scatter_t_test}
-    \caption{ \textbf{Problem II}, Goodness of fit, Timalag $\Delta(t)$ }
+    \caption{ \textbf{Problem II}, Goodness of fit, Timalag $\tau(t)$ }
     \label{fig:problem2_fitt}
   \end{subfigure}
   
@@ -723,7 +709,7 @@ time lag from the training data.
   \begin{subfigure}[b]{0.4\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/exp3_scatter_t_test}
-    \caption{ \textbf{Problem III}, Goodness of fit, Time lag $\Delta(t)$ }
+    \caption{ \textbf{Problem III}, Goodness of fit, Time lag $\tau(t)$ }
     \label{fig:problem3_fitt}
   \end{subfigure}
 
@@ -820,7 +806,7 @@ we can see that the time lag errors are symmetric.
   \begin{subfigure}[b]{0.4\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/exp4_scatter_t_test}
-    \caption{ \textbf{Problem IV}, Goodness of fit, Time lag $\Delta(t)$ }
+    \caption{ \textbf{Problem IV}, Goodness of fit, Time lag $\tau(t)$ }
     \label{fig:problem4_fitt}
   \end{subfigure}
   
