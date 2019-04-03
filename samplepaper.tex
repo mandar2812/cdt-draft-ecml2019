@@ -444,7 +444,7 @@ paper is general in nature.
 From the intuitions of Granger causality, we use the concept of causality as predictability, 
 we can thus characterize the \emph{target probability}, $\widetilde{p}$ for a time window 
 $[t+\ell, t+\ell+h)$ in the following manner: The lagged output $y(t+i)$ which has greater 
-predictability given $x(t)$, is a more likely causal link. This idea is represented in 
+predictability given $x(t)$, is a more likely temporal link. This idea is represented in 
 equation \ref{eq:targetprob}, by means of the softmax function and a smoothing parameter 
 $\beta$.
 
@@ -455,9 +455,6 @@ $\beta$.
 
 The hyper-parameter $\beta$ serves to determine how sharp the target probability distribution is 
 around its peak.
-
-
-
 
 
 \section{Hyper-parameters}
@@ -484,11 +481,12 @@ Our proposed model has two classes of hyper-parameters which we discuss below.
 
 \subsection{Loss Function}
 
-These quantitites $\lambda_1, \lambda_2, \alpha, \beta$ are specific to the PDT loss function in equation 
+These quantitites $\lambda, \alpha, \beta$ are specific to the PDT loss function in equation 
 \ref{eq:loss}. 
 
 \begin{enumerate}
-\item The weights $\lambda_1, \lambda_2$ control the importance of each term in the loss (equation \ref{eq:loss}).
+\item The weight $\lambda$ controls the relative importance of the weighted error with 
+      respect to the divergence (equation \ref{eq:loss}).
 \item The quantity $\beta$ determines the flatness of the target distribution, i.e. large values of $\beta$ 
       make the target distribution $\tilde{p}(y, \hat{y})$ peaked. Care must be taken to not set $\beta$ to a value
       that is very large ($\gg 1$), as this may cause numerical instabilities in the learning/optimization process.
@@ -546,7 +544,7 @@ of PDT modelling.
 \subsection{Data Generation}
 
 We start by generating the time series $x(t) \in \mathbb{R}^8$, of size $4000$ 
-(one copy for training and another for test), which represent the driving/causal forces in our system. 
+(one copy for training and another for test), which represent the driving forces in our system. 
 This can be achieved with good flexibility using \emph{Stochastic Langevin Dynamics} as shown in 
 equation \ref{eq:data}.
 
@@ -606,7 +604,7 @@ The results of the experiments of \ref{sec:benchmark} are evaluated using the fo
     \item Output-Time Lag charts: Since the output time lag relationship can be expressed in closed 
           form, we can visualize this relationship in the generated data sets and evaluate how well 
           the model is able to infer it.
-    \item Error Scatter charts: Scatter plots of prediction error in velocity vs prediction error 
+    \item Error heat-maps: Heat maps of prediction error in velocity vs prediction error 
           in time lag. They help in visualizing the shape of the error distribution.
 \end{enumerate}
 
