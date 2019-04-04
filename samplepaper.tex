@@ -126,44 +126,41 @@ $g(.):\mathcal{X}  \rightarrow \mathbb{N}$.
 
 Henceforth we will work with the discretized time series $x^m$ and $y^m$.
 
-\section{Probabilistic Formulation}
+\section{Probabilistic Formulation}\label{sec:probform}
 
 Unlike the classical supervised learning problem, we cannot associate a time lagged output
 $y^{m + i}$ and input $x^m$ with absolute certainty. It is therefore beneficial to relax 
-the assumption of a deterministic time lag to a stochastic one.
+the assumption of a deterministic time lag to a stochastic one. Our strategy consists of
+learning a set of independent predictors $\{\hat y_i(x),i=1,\ldots n\}$ associated to a fixed horizon indexed by $i$, along with a set
+of probabilistic weights $\{\hat p_i(x),i=1,\ldots n\}$ summing to one, indicating for a given input $x$ the probability for each horizon $i$
+to be the correct one. These weights naturally arise from a latent variable model that we describe now.
 
-\subsection{Likelihood formulation in the discrete case}
+\subsection{Latent model and associated likelihood}\label{sec:latent}
 
 Suppose we discretize time in units of $\delta t$, such that for a given event $x^{(m)}$ at time  
 $t = m\ \delta t$, the possible time lag $\tau^{(m)}$ is within a window $[\tau_{min},\tau_{max}]$. 
 This interval is as well discretized into $n = (\tau_{max}-\tau_{min})/\delta t $ intervals so that 
-the effect if any of this event has to be found in the vector of size $n$ of possible effects denoted 
-${\bf y}^{(m)} = \{y_1^{(m)},\ldots,y_n^{(m)}\}$.
-
-Our probabilistic formulation is given by the following conditional probability distribution:
-
-\begin{align}
-  P\bigl[{\bf y}^{m} = {\bf y}\vert x^{(m)}=x\bigr] &= \nonumber\\[0.2cm]
-  \sum_{\{\tau_i\in\{0,1\}\}} & \hat p\bigl(\tau_1,\ldots,\tau_n\vert x)
-\frac{1}{(2\pi)^{n/2}\prod_i\sigma_i({\bf \tau})}
-\exp\Bigl(-\frac{1}{2}\sum_{i=1}^n\frac{\bigl(y_i-\hat y_i(x)\bigr)^2}{\sigma_i({\bf \tau})^2}\Bigr),\label{eq:py}
-\end{align}
+the effect if any of this event has to be found in the vector of size $n$ of possible effects $(y^{(m+1)},\ldots,y^{(m+n)}\}$.
+Assume now that for a given cause $x$ we are given a set of independent predictors $\{\hat y_i(x),i=1,\ldots n\}$ for these effects.
+Our probabilistic formulation is based on the following conditional probability distribution:
+\begin{equation}\label{eq:py}
+  P\bigl[{\bf y}^{m} = {\bf y}\vert x^{(m)}=x\bigr] = \sum_{\{\tau_i\in\{0,1\}\}}  \hat p\bigl(\tau_1,\ldots,\tau_n\vert x)
+\prod_{i=1}^n {\cal N}\bigl(\hat y_i(x),\sigma_i(\tau)\bigr)
+\end{equation}
 with 
 \[
 \sigma_i({\bf \tau})^{-2} = \Bigl(1+\sum_j\alpha_{ij} \tau_j\Bigr)\sigma^{-2},
 \]
-with $\sigma^2$ a default variance and $\alpha_{ij}\ge 0$ a matrix of non-negative real parameter and $\hat y(x)$ a vector of mean effects corresponding to a given cause $x$. 
-This is a local mixture model function of the input variable $x$.
-The meaning of this is the following: for a given cause $x$ the effect
+with $\sigma^2$ a default variance and $\alpha_{ij}\ge 0$ a matrix of non-negative real parameter. 
+This is a local mixture model function of the input variable $x$. Its precise meaning is the following: for a given cause $x$ the effect
 $y_i$ at horizon $i$ has a normal distribution centered on $\hat y_i(x)$ with  variance $\sigma_i^2({\bf \tau})$ independent of $x$ as a simplifying assumption. $\{\tau_1,\ldots,\tau_n\}$ is a set of binary
-latent variables encoding the stochastic causal time lag, by telling whether $x$ causes $y_i$ ($\tau_i=1$) or not ($\tau_i=0$). Since we expect a one to one correspondence between causes
-$x_t$ and effect $y_{t+\tau(t)}$ we impose the constraint
+latent variables encoding the stochastic causal time lag, telling whether $x$ causes $y_i$ ($\tau_i=1$) or not ($\tau_i=0$). Since we expect a one to one correspondence between causes
+$x^{(m)}$ and effects $y^{m+i}$ we impose the constraint
 \begin{equation}\label{eq:cs1}
-\sum_{i=1}^n \tau_i = 1,
+\sum_{i=1}^n \tau_i = 1.
 \end{equation}
-which means that $x$ causes one single effect among the $n$ possible ones. The fact that $x$ can influence $y_i$ through the bias $\hat y_i(x)$ even when $\tau_i=0$ reflects an indirect
-influence due to a finite auto-correlation time of $y_t$. But this comes with a higher variance, by assuming that $\alpha_{ij}$ is a decreasing function of $\vert i-j\vert$, 
-since then $\sigma_i(\tau_i=0)^2\ge \sigma_i(\tau_i=1)^2$.
+The fact that $x$ can influence $y_i$ through the bias $\hat y_i(x)$ even when $\tau_i=0$ reflects an indirect
+influence due to a finite auto-correlation time of $y_t$. But this should come with a higher variance, insured when $\alpha_{ij}$ is a decreasing function of $\vert i-j\vert$.
 A large value of $\alpha$ should correspond to a small auto-correlation time. From the constraint~(\ref{eq:cs1}), $\hat p(\tau\vert x)$ is specified by  a vector
 $\{\hat p_i(x),i=1,\dots n\}$ corresponding to
 \[
@@ -173,63 +170,36 @@ with
 \[
 \sum_{i=1}^n \hat p_i(x) = 1.
 \]
-We are now in position to justify the loss function which will be used later on to train our model, as arising from a large deviation functional of the likelihood. Indeed assume that the number of learning samples tends to infinity, and so that in a small volume $dv = dxd{\bf y}$ around a given  joint configuration $(x,{\bf y})$, the number of data $N_{x,{\bf y}}$ becomes large. Restricting the likelihood to this subset of the data yields the following:
+The log likelihood associated to this joint measure is (see appendix~\ref{app:LL}):
 \[
-{\cal L}_{x,{\bf y}} = \prod_{m=1}^{N_{x,{\bf y}}} \sum_{\{\tau^{(m)}\}} 
-\frac{\hat p(\tau^{(m)}\vert x)}{\prod_{i=1}^n\sqrt{2\pi}\ \sigma_i(\tau^{(m)})}
-\exp\Bigl(-\frac{1}{2}\sum_{i=1}^n\frac{\bigl(y_i-\hat y_i(x)\bigr)^2}{\sigma_i(\tau^{(m)})^2}\Bigr).
+{\cal L}\bigl[\hat {\bf y},\sigma,{\bf \alpha}] = -\frac{n}{2}\log(\sigma)-{\mathbb E}_{data}\Bigl[\frac{1}{2\sigma^2}\sum_{i=1}^n\bigl(y_i-\hat y_i(x)\bigr)^2
+-\log\bigl(Z(\sigma,{\bf \alpha})\bigr)\Bigr],
 \]
-Upon introducing the relative frequencies:
-\[
-p_i(x,{\bf y}) = \frac{1}{N_{x,{\bf y}}}\sum_{m=1}^{N_{x,{\bf y}}} \tau_i^{(m)} 
-\]
-with the constraint
-\begin{equation}\label{eq:cs2}
-\sum_{i=1}^n p_i(x,{\bf y}) = 1,
-\end{equation}
-the sum over the $\tau_i^{(m)}$ is replaced by a sum over these new variables, with the summand obeying a large deviation principle (see e.g.~\cite{Touchette})
-\[
-{\cal L}_{x,{\bf y}} \asymp \sum_{{\bf p}} 
-\exp\Bigl(-N_{x,{\bf y}} {\cal F}_{x,{\bf y}}\bigl[{\bf p}\bigr]\Bigr)
-\]
-where the rate function simply reads from Sanov's theorem
-\[
-{\cal F}_{x,{\bf y}}\bigl[\{p\}\bigr] = n\log(\sigma)+
-\sum_{i=1}^n\Bigl[\bigl(y_i-\hat y_i(x)\bigr)^2\frac{1+\sum_j\alpha_{ij}p_j}{2\sigma^2}
--\frac{1}{2}p_i\sum_j\log(1+\alpha_{ji})+p_i\log\frac{p_i}{\hat p_i}\Bigr].
-\]
-Taking the saddle point yields the following:
-\begin{equation}\label{eq:hatpi}
-p_i(x,{\bf y}) = \frac{1}{Z(\sigma,{\bf \alpha})}\hat p_i(x)\exp\Bigl(-\frac{1}{2\sigma^2}\sum_j\alpha_{ji}\bigl(y_j-\hat y_j(x)\bigr)^2+\frac{1}{2}\sum_j\log(1+\alpha_{ji})\Bigr),
-\end{equation}
 with
 \[
-Z(\sigma,{\bf \alpha}) = \sum_{i=1}^n\hat p_i(x)\exp\Bigl(-\frac{1}{2\sigma^2}\sum_j\alpha_{ji}\bigl(y_j-\hat y_j(x)\bigr)^2+\frac{1}{2}\sum_j\log(1+\alpha_{ji})\Bigr),
+Z(\sigma,{\bf \alpha}) = \sum_{i=1}^n\hat p_i(x)\exp\Bigl(-\frac{1}{2\sigma^2}\sum_j\alpha_{ji}\bigl(y_j-\hat y_j(x)\bigr)^2+\frac{1}{2}\sum_j\log(1+\alpha_{ji})\Bigr).
 \]
-insuring the normalization~(\ref{eq:cs2}). $p_i(x,{\bf y})$ is actually the conditional probability $P(\tau_i=1\vert x,y)$ which can be obtained from~(\ref{eq:py}).
-Using this the log likelihood can be expressed as
-\[
-  {\cal L}\bigl[\hat {\bf y},\sigma,{\bf \alpha}] = -\frac{n}{2}\log(\sigma)-{\mathbb E}_{data}\Bigl[\frac{1}{2\sigma^2}\sum_{i=1}^n\bigl(y_i-\hat y_i(x)\bigr)^2
-    -\log\bigl(Z(\sigma,{\bf \alpha})\bigr)\Bigr],
-\]
-The parameters of the model can be optimized to yield the following natural estimates:
+Optimizing ${\cal L}$ yields the following expression of the optimal parameters:
 \begin{equation}\label{eq:var}
 \frac{\sigma^2}{1+\alpha_{ij}} = \frac{{\mathbb E}_{data}\bigl[\bigl(y_i-\hat y_i(x)\bigr)^2p_j(x,{\bf y})\bigr]}{{\mathbb E}_{data}\bigl[p_j(x,{\bf y})\bigr]},
 \end{equation}
-(the optimization of $\sigma$ does not yield an independent equation).
+by means of the conditional probability $P(\tau_i=1\vert x,{\bf y})$ which actually reads
+\begin{equation}\label{eq:hatpi}
+p_i(x,{\bf y}) = \frac{1}{Z(\sigma,{\bf \alpha})}\hat p_i(x)\exp\Bigl(-\frac{1}{2\sigma^2}\sum_j\alpha_{ji}\bigl(y_j-\hat y_j(x)\bigr)^2+\frac{1}{2}\sum_j\log(1+\alpha_{ji})\Bigr).
+\end{equation}
 These are implicit equations, since ${\bf p}(x,{\bf y})$ depends on the parameters $\sigma^2$ and $\alpha_{ij}$.
-
-Finally note that $\hat p$ is also subject of being optimized. We have
-\[
-\frac{\partial{\cal L}}{\partial \hat p_i(x)} = {\mathbb E}_{data,y}\Bigl[\frac{p_i(x,{\bf y})}{\hat p(x)}-\lambda(x)\Bigr],
-\]
-with $\lambda(x)$ a Lagrange multiplier to insure that $\sum_i\hat p_i(x)=1$ for any $x$. Therefore we simply get ($\lambda(x)=1$)
+In addition the optimal $\hat {\bf p}$ reads
 \begin{equation}\label{eq:tildep}
 \hat p_i(x) = {\mathbb E}_{data,y}\Bigl[p_i(x,{\bf y})\Bigr].
 \end{equation}
 
-Practically these saddle point equations can be solved by alternatively updating $\tilde {\bf p}$
-and the parameters through equations~(\ref{eq:hatpi}) and~(\ref{eq:var}).
+Practically the saddle point equations (\ref{eq:var},\ref{eq:hatpi},\ref{eq:tildep}) can be solved by alternatively updating $\hat {\bf p}$
+and the parameters through equations~(\ref{eq:hatpi}) and~(\ref{eq:var}). The type of solution to be expected is analyzed in the next section,
+in a simpler case where $\alpha_{ij} = \alpha\delta_{ij}$.
+
+
+
+
 
 \subsection{Linear stability analysis}
 Let $\Delta y_i^2(x)= \bigl(y_i-\hat y_i(x)\bigr)^2$ and
