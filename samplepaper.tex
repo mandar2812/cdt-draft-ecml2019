@@ -245,9 +245,9 @@ we would like to know given $x$, what is the optimal predictor for $y_i(x)$. Any
 $\hat z(x) = (\hat y(x),\hat I(x))$ where $\hat I(x)$ is the predicted index and $\hat y(x)$ the predicted value.
 This is necessarily associated to a loss function 
 which we specify as an $L_2$ norm:
-\[
+\begin{equation}\label{eq:orloss}
 {\cal L}(\hat y,\hat I) = {\mathbb E}_{data}\Bigl[\bigl(y_{\hat I(x)}-\hat y(x)\bigr)^2\Bigr]. 
-\]
+\end{equation}
 Then we have the following statement:
 \begin{prop}\label{prop:opred}
 Based on~(\ref{eq:py}), with $\alpha_{ij} = \alpha\delta_{ij},\ \alpha>0$, the optimal composite predictor $(y^\star,I^\star)$ is given by
@@ -264,109 +264,46 @@ to solve two  regression problems, namely $\hat {\bf y}(x)$ and $\hat {\bf p}(x)
 and $\sigma^2$ in order then to be able to iterate the saddle point equations. The practical implementation of this framework will be described in the next section.
 
 
+\section{Practical Solution}\label{sec:model}
 
-\section{Proposed Solution}\label{sec:model}
-
-For practical purposes one must define for every time step $t$, a \emph{time window} 
-$[t+\ell, t+\ell+h)$, within which the model searches for probable temporal links. 
-Instead of predicting $\delta \in [\ell, \ell+h)$, one can provide a predictive distribution 
-over the time window.
-
-Our proposed model thus produces for a given input $x(t)$ at time $t$ the following predictions:
-
-\begin{enumerate}
-\item Targets $\hat{y}(t+\ell), \cdots, \hat{y}(t+\ell+h-1)$
-\item Time Lag Probabilities $\hat{p}(t+\ell), \cdots, \hat{p}(t+\ell+h-1)$
-\end{enumerate}
-
-The model thus tries to learn a predictor for each lagged output $y(t+i)$ in the time window 
-$[t+\ell, t+\ell+h)$, and simultaneously supplies a probability distribution over each time step 
-of the time window, $\hat{p}(t+i)$.
-
-The distribution $\hat{p}(t+i), i \in {\ell, \cdots, \ell+h-1}$ represents the 
-likelihood of a causal link between $x(t)$ and $y(t+i)$. Since the model looks
-for causal links in the finite window $[t+\ell, t+\ell+h)$, we have 
-$\sum^{\ell+h-1}_{i = \ell}{\hat{p}(t + i)} = 1$.
-
-
-\subsection{Loss Function}
-
-\begin{equation}\label{eq:loss}
-\begin{aligned}
-\mathcal{J}(y^{(1:M)}, &\hat{y}^{(1:M)}, \hat{p}^{(1:M)}) =\\ 
-& \sum_{i,m}{\frac{1}{2M} (y^{(m)}_{i} - \hat{y}^{(m)}_{i})^2 (1 + \alpha \hat{p}^{(m)}_i)} \\ 
-+ &\lambda \frac{1}{M} \sum_{m = 1}^{M}{\sum_{i}{\hat{p}^{(m)}_{i}log \left (\frac{\hat{p}^{(m)}_i}{\tilde{p}^{(m)}_i} \right)}}
-\end{aligned}
+\subsection{Neural network architecture}
+From the practical point of view, the two aforementioned regression problems $\hat {\bf y}(x)$ and $\hat {\bf p}(x)$ can be solved efficiently with help of neural networks, with possibly deep
+architectures depending on the dimension of the input signal $x$. Since the output $y$ and time lag $\tau$ have common causes we expect a single architecture with feature sharing
+for $\hat {\bf y}(x)$ and $\hat {\bf p}(x)$ to be more efficient.
+Beside the output layer which is constrained to be of size $2 \times n$ where $n$ is the chosen size of the time window,
+the composition and size of the layers preceding the output layer are dependent on the application. 
+One may choose \emph{convolutional layers} for input data which consists of images and fully connected 
+layers for vector data.
+In section \ref{sec:exp}, we use fully connected neural architectures sketched on Figure~\ref{fig:archi}, having a maximum depth of 
+two hidden layers, for prediction of outputs and time lags. 
+\begin{figure}[ht]
+\centerline{\resizebox*{0.7\textwidth}{!}{\input{archi.pdf_t}}}
+\caption{\label{fig:archi} Architecture of the neural network specified by the number of units $(d,n_1^h,n_2^h,2n)$ in each layer.}
+\end{figure}
+In order to train it we retro-propagate the following loss function
+\begin{equation}
+\mathcal{J}(y^{(1:M)}, \hat{y}^{(1:M)}, \hat{p}^{(1:M)}) =
+ \frac{1}{M}\sum_{i,m} \frac{1 + \alpha \hat{p}^{(m)}_i}{2\sigma^2}(y^{(m)}_{i} - \hat{y}^{(m)}_{i})^2   
++  \hat{p}^{(m)}_{i}\log \left (\frac{\hat{p}^{(m)}_i}{\tilde{p}^{(m)}_i} \right).\label{eq:loss}
 \end{equation}
-      
-
-The above loss function is computed over a mini-batch of size $M$, the indices $i$ denote the
-individual components of each prediction, while $m$ refers to data sample indices within the
-mini-batch in question.
-
-\subsection{Weighted Error}
-
-
-\begin{align}\label{eq:errorfunc}
-&\mathcal{L}(y^{(1:M)}, \hat{y}^{(1:M)}, \hat{p}^{(1:M)}) =\\ 
-& \sum_{i,m}{\frac{1}{2M} (y^{(m)}_{i} - \hat{y}^{(m)}_{i})^2 (1 + \alpha \hat{p}^{(m)}_i)}
-\end{align}
-
-We want to avoid the situation where the model cherry picks one of the outputs 
-$j$ in the time window and concentrates most of the predictive 
-distribution $\hat p^{(m)}$ around the time index $j$. The factor 
-$(1 + \alpha \hat p_i^{(m)})$ instead of $\hat p_i^{(m)}$ in the first term 
-contributes to avoid this cherry picking effect. It forces the model to 
-generate well performing predictions for the entire time window and then 
-move its predictive distribution to peak around the most predictable time index.
-
-\subsection{Divergence}
-
-It is important to penalize the model's time lag predictive distribution 
-$\hat{p}(x(t))$ so that the model learns the time lag structure inherent in the 
-training data.
-
-For this purpose we must define some \emph{target probability} $\tilde{p}(x)$ 
-(see section \ref{sec:targetprob}) and compute the divergence between the models causal 
-time lag distribution $\hat{p}(x(t))$ and the \emph{target probability} $\tilde{p}(x(t))$. 
-We call this term \emph{causal divergence}.
-
-There are a number of candidate choices for defining the model's \emph{causal divergence}, 
-i.e.  \emph{Kullback-Leibler divergence} \cite{kullback1951}, 
-\emph{Jensen-Shannon divergence} \cite{jensen-shannon}, \emph{Total Variational distance} 
-\cite{villani2009three}, \emph{Hellinger distance} \cite{hellinger} and 
-\emph{Bhattacharya distance} \cite{bhattacharyya} to name a few. 
-
-We found that for the applications considered in this work, \emph{Kullback-Leibler divergence} 
-worked best. In principle it is possible to use any one of the mentioned 
-divergence/distance measures as a penalty, since the work outlined in this 
-paper is general in nature.
-
-\begin{align}\label{eq:causaldiv}
-&\mathcal{H}\left(\hat{p}^{(1:M)}, \tilde{p}^{(1:M)} \right) = \\
-&\nonumber \frac{1}{M} \sum_{m = 1}^{M}{\sum_{i}{\hat{p}^{(m)}_{i}log \left (\frac{\hat{p}^{(m)}_i}{\tilde{p}^{(m)}_i} \right)}}
-\end{align}
-
-
-\subsection{Target Probability}\label{sec:targetprob}
-
-From the intuitions of Granger causality, we use the concept of causality as predictability, 
-we can thus characterize the \emph{target probability}, $\widetilde{p}$ for a time window 
-$[t+\ell, t+\ell+h)$ in the following manner: The lagged output $y(t+i)$ which has greater 
-predictability given $x(t)$, is a more likely temporal link. This idea is represented in 
-equation \ref{eq:targetprob}, by means of the softmax function and a smoothing parameter 
-$\beta$.
-
+This function is computed over a mini-batch of size $M$ with $m=1\ldots M$ referring  to data sample indices within the
+mini-batch in question. Its form is  adapted from the theoretical considerations discussed in the previous section in order to allow for feature sharing.
+It can be considered as a convex relaxation of the loss function~(\ref{eq:orloss}). 
+Parameters $\alpha$ and $\sigma^2$ have been already defined. From the variational point of view it can be checked easily that this form leads
+each predictor $\hat y_i(x)$ to minimize a squared error independently of each other and of the other set of predictors $\hat {\bf p}$, while these one should converge
+to the form given in~(\ref{eq:tildep}).
+$\tilde p(x)$ is an optional prior distribution, possibly based on expert knowledge, which corresponds to some initializing of $\hat p(x)$. 
+In practice we use
 \begin{equation}\label{eq:targetprob}
-\widetilde{p}_{i}^{(m)} = \frac{exp \left(- \beta (y_{i}^{(m)} - \hat{y}_{i}^{(m)})^{2} \right)}
-{\sum_{i}{exp \left(- \beta (y_{i}^{(m)} - \hat{y}_{i}^{(m)})^{2} \right)}} 
+\widetilde{p}_{i}^{(m)} = \frac{\exp \left(- \beta (y_{i}^{(m)} - \hat{y}_{i}^{(m)})^{2} \right)}
+{\sum_{i}{\exp \left(- \beta (y_{i}^{(m)} - \hat{y}_{i}^{(m)})^{2} \right)}} 
 \end{equation}
-
-The hyper-parameter $\beta$ serves to determine how sharp the target probability distribution is 
-around its peak.
+with $\beta>0$ an additional parameter, which in the end correspond to the  shift $\alpha\to\alpha+\beta$.
 
 
-\section{Hyper-parameters}
+
+
+\subsection{Hyper-parameters tuning}
 
 Hyper-parameter selection is an important part of the model training process in the PDT problem. 
 The hyper-parameter selection problem in deep learning has received much attention and a number 
@@ -384,53 +321,9 @@ Bergstra \& Bengio \cite{randomsearchBengio} showed that random search can be an
 hyper-parameters in several problem domains, and serve as a good baseline which can enable 
 further improvement in model performance.
 
-
 In the current work, we employ random search for hyper-parameter selection. 
-Our proposed model has two classes of hyper-parameters which we discuss below.
-
-\subsection{Loss Function}
-
-These quantitites $\lambda, \alpha, \beta$ are specific to the PDT loss function in equation 
-\ref{eq:loss}. 
-
-\begin{enumerate}
-\item The weight $\lambda$ controls the relative importance of the weighted error with 
-      respect to the divergence (equation \ref{eq:loss}).
-\item The quantity $\beta$ determines the flatness of the target distribution, i.e. large values of $\beta$ 
-      make the target distribution $\tilde{p}(y, \hat{y})$ peaked. Care must be taken to not set $\beta$ to a value
-      that is very large ($\gg 1$), as this may cause numerical instabilities in the learning/optimization process.
-\item The quantity $\alpha$ determines the sharpness of the model's predictive distribution $\hat{p}(x(t))$, 
-      we call this hyper-parameter the \emph{specificity}.        
-\end{enumerate}
- 
-
-\subsection{Model \& Regularization}
-
-These hyper-parameters generally concern with details around the network architecture and 
-regularization. They may be the number of layers, size of each layer and magnitude of the 
-regularization constant.
 
 
-
-\section{Model Architecture}
-
-The choice of model architecture is constrained by only one condition, i.e. the number of neurons 
-in the output layer must be $2 \times h$ where $h$ is the chosen size of the time window. 
-The composition and size of the layers preceding the output layer are dependent on the application, 
-one may choose \emph{convolutional layers} for input data which consists of images and fully connected 
-layers for vector data.
-
-%\begin{figure}[h]
-%\vspace{.3in}
-%\centerline{\includegraphics[width=0.5\textwidth]{figures/network.jpg}}
-%\vspace{.3in}
-%\caption{Network architecture}
-%\label{fig:network}
-%\end{figure}
-
-
-In section \ref{sec:exp}, we use fully connected neural architectures having a maximum depth of 
-two hidden layers, for prediction of outputs and time lags.
 
 \section{Experiments}\label{sec:exp}
 
