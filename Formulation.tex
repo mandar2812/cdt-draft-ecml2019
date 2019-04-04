@@ -1,52 +1,57 @@
 \section{Position of the problem}\label{sec:formulation}
-
-Time lag inference is essentially a regression problem with two tasks. 
-Given two time series, the causes $x(t)$ and the observed effects $y(t)$, the regression model 
-must learn a mapping $f(.)$ which maps each input pattern $x(t_1)$ to an output $y(t_2)$, and a 
-mapping $g(.)$ which maps the time delay between the input and output patterns $t_2 = t_1 + g(x(t_1))$. 
-This is formally specified in equations below.
-
+Given time series $x(t)$ (the causes in  $\mathcal{X}$) and $y(t)$ (the observed effects in  $\mathbb{R}$), the task consists of learning two mappings $f: \mathcal{X}  \mapsto \mathbb{R}$ and $g: \mathcal{X}  \mapsto \mathbb{R}^+$ such that:
 \begin{align}
 y(t + \tau(t)) & = f[x(t)]\label{eq:pb1}\\
 \tau(t) & = g[x(t)]\label{eq:pb2} 
 \end{align}
-with
+By construction, the classical regression problem is when $\tau(t) =0$ for all $t$.\footnote{Note that if $\tau(t)$ takes a constant value $c$, the problem can also be brought back to a simple regression problem, by considering all values $c$ and retaining the one yielding the model with best accuracy.} 
+
+The setting considered in this paper, referred to as {\em non-stationary delayed regression} (NSDR) is when the time lag $\tau(t)$ is an unknown non-stationary function of $x(t)$. 
+It is always assumed that $tau(t)$ is positive (effects follow their causes). In the continuous time setting, it is usually assumed that function $t + \tau(t)$ is continuous and bijective (at any point in time, the observed effects come from a cause). Zhou \& Sornette \cite{ZHOU2006195} further assume that $t + \tau(t) \le t' + \tau(t')$ for all $t< t'$ (the effects of an earlier cause are not observed after the effects of a later cause).\footnote{Note that this assumption does not hold for physical phenomena and space weather in particular, e.g. fast moving 
+solar wind can reach the Earth before slow moving solar wind which departed before it.}
+
+In the remainder of the paper, only the discrete time NSDR problem is considered.
+
+\subsection{Discrete NSDR}
+Let $x(t)$ and $y(t)$ be measured for $t \in 1 \ldots T$, and let us assume that $\tau(t)$ varies in some known interval. With no loss of generality let this interval be set to $[1, n]$. The proposed approach  consists of learning a set of $n$ models $\hat y_i: \mathcal{X} \mapsto \mathcal{R}$, for $i=1,\ldots n$, and a set of $n$ functions $\hat p_i:  \mathcal{X} \mapsto [0,1]$ such that $p_i(x)$ indicates the probability for $\hat y_i$ to be the right model for $x$, subject to  $\sum_i \hat p_i(x) = 1$.
+
+Formally, o
+associated to a fixed horizon indexed by $i$, along with a set
+of probabilistic weights $\{\hat p_i(x),i=1,\ldots n\}$ summing to one, indicating for a given input $x$ the probability for each horizon $i$
+to be the correct one. These weights naturally arise from a latent variable model that we describe now.
+
+\subsection{Latent model and associated likelihood}\label{sec:latent}
+
+Suppose we discretize time in units of $\delta t$, such that for a given event $x^{(m)}$ at time  
+$t = m\ \delta t$, the possible time lag $\tau^{(m)}$ is within a window $[\tau_{min},\tau_{max}]$. 
+This interval is as well discretized into $n = (\tau_{max}-\tau_{min})/\delta t $ intervals so that 
+the effect if any of this event has to be found in the vector of size $n$ of possible effects $(y^{(m+1)},\ldots,y^{(m+n)}\}$.
+Assume now that for a given cause $x$ we are given a set of independent predictors $\{\hat y_i(x),i=1,\ldots n\}$ for these effects.
+Our probabilistic formulation is based on the following conditional probability distribution:
+\begin{equation}\label{eq:py}
+  P\bigl[{\bf y}^{m} = {\bf y}\vert x^{(m)}=x\bigr] = \sum_{\{\tau_i\in\{0,1\}\}}  \hat p\bigl(\tau_1,\ldots,\tau_n\vert x)
+\prod_{i=1}^n {\cal N}\bigl(\hat y_i(x),\sigma_i(\tau)\bigr)
+\end{equation}
+with 
 \[
-f: \mathcal{X}  \rightarrow \mathbb{R},\qquad\text{and}\qquad
-g: \mathcal{X}  \rightarrow \mathbb{R}^{+},
+\sigma_i({\bf \tau})^{-2} = \Bigl(1+\sum_j\alpha_{ij} \tau_j\Bigr)\sigma^{-2},
 \]
-$t \in \mathbb{R}^{+}$ represents the continuous temporal domain. The input signal 
-$x(t)\in \mathcal{X}$ is possibly high dimensional and contains the hidden cause to 
-the effect $y(t)\in\mathbb{R}$ which is considered as a scalar in this paper. 
-$\tau(t)\in \mathbb{R}^+$ represents the time delay between inputs and outputs.
-
-It is important to note some caveats about this time lag which make this inference problem 
-different from classical time series regression problems.
-
-Firstly, the time lag $\tau(t)$ can be \emph{non-stationary} i.e. dependent on the input $x(t)$. 
-Secondly, in practical applications such as the motivating space weather example, $\tau(t)$ 
-is not recorded explicitly in the training data. This makes model training and evaluation 
-challenging.
-
-One may make certain assumptions on the time warping function $\phi(t) = t + \tau(t)$, in the general 
-formulation of the problem presented here: 
-
-\begin{enumerate}
-    \item $\phi(.)$ is assumed to be continuous and \emph{bijective}.
-    \item Zhou \& Sornette \cite{ZHOU2006195} enforce further assumptions 
-          such as $\phi(t_1) \leq \phi(t_2), \forall t_1 \leq t_2$, which 
-          are incorporated via constraints. This approach respects the 
-          properties associated with the warping function $\phi(.)$ but 
-          increase the computational complexity of the resulting 
-          optimization problem.
-\end{enumerate}
-
-The second assumption can be restrictive for applications in space physics, where fast moving 
-solar wind can reach the Earth before slow moving solar wind which departed before it. 
-
-In practical time-series applications, one works with sub-sampled or discretized versions of the time 
-series $x(t)$ and $y(t)$. In this case the map $g(.)$ is replaced by its discrete analogue 
-$g(.):\mathcal{X}  \rightarrow \mathbb{N}$. 
-
-Henceforth we will work with the discretized time series $x^m$ and $y^m$.
-
+with $\sigma^2$ a default variance and $\alpha_{ij}\ge 0$ a matrix of non-negative real parameter. 
+This is a local mixture model function of the input variable $x$. Its precise meaning is the following: for a given cause $x$ the effect
+$y_i$ at horizon $i$ has a normal distribution centered on $\hat y_i(x)$ with  variance $\sigma_i^2({\bf \tau})$ independent of $x$ as a simplifying assumption. $\{\tau_1,\ldots,\tau_n\}$ is a set of binary
+latent variables encoding the stochastic causal time lag, telling whether $x$ causes $y_i$ ($\tau_i=1$) or not ($\tau_i=0$). Since we expect a one to one correspondence between causes
+$x^{(m)}$ and effects $y^{m+i}$ we impose the constraint
+\begin{equation}\label{eq:cs1}
+\sum_{i=1}^n \tau_i = 1.
+\end{equation}
+The fact that $x$ can influence $y_i$ through the bias $\hat y_i(x)$ even when $\tau_i=0$ reflects an indirect
+influence due to a finite auto-correlation time of $y_t$. But this should come with a higher variance, insured when $\alpha_{ij}$ is a decreasing function of $\vert i-j\vert$.
+A large value of $\alpha$ should correspond to a small auto-correlation time. From the constraint~(\ref{eq:cs1}), $\hat p(\tau\vert x)$ is specified by  a vector
+$\{\hat p_i(x),i=1,\dots n\}$ corresponding to
+\[
+\hat p_i(x) = \hat p(\tau_1=0,\ldots,\tau_i=1,\ldots,\tau_n=0\vert x),
+\]
+with 
+\[
+\sum_{i=1}^n \hat p_i(x) = 1.
+\]

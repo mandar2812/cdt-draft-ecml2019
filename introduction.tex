@@ -3,17 +3,17 @@ A significant body of work in machine learning concerns the modeling of spatio-t
 ranging from markets \cite{Pedreschi} to weather forecasting \cite{Horvitz}.
 
 This paper focuses on the problem of modeling the dependency between two series, 
-where the latter one is {\em caused} by the former one \cite{Granger}. 
+where the latter one is {\em caused} by the former one \cite{Granger} with a non-stationary time delay. 
 
 The motivating application domain is that of space weather.
 The sun, a perennial source of charged energetic particles, is at the origin of a number of geomagnetic phenomena within the sun-earth system. 
-Specifically, the sun ejects charged particles into the surrounding space in all directions; and some of these particle clouds, a.k.a. solar winds, reach the earth vicinity. High speed solar wind is a major threat for the modern world, causing severe damages to e.g., satellites, telecommunication infrastructures, under sea pipelines, among others.\footnote{Economists have estimated that the adverse impact of space weather cost 200 to 400 million per year, but can sporadically lead to much larger losses.} 
+Specifically, the sun ejects charged particles into the surrounding space in all directions; and some of these particle clouds, a.k.a. solar winds, reach the earth vicinity. High speed solar wind is a major threat for the modern world, causing severe damages to e.g., satellites, telecommunication infrastructures, under sea pipelines, among others.\footnote{Economists have estimated that the adverse impact of space weather costs 200 to 400 millions per year, but can sporadically lead to much larger losses.} 
 A key prediction task thus is to forecast the speed of the \emph{solar wind} in 
 the vicinity of the Earth \cite{doi:10.1002/jgra.50429,doi:10.1029/2009SW000542}, sufficiently early to emit an alarm and be able to prevent the damages to the best possible extent.
 Formally the goal is to model the dependency between the solar images (available at light speed), referred to as {\em cause series} 
-and the solar wind speed series as recorded at the Lagrangian point $L_1$ (distant from the Earth by XX kilometers), referred to as {\em effect series}. 
+and the solar wind speed series as recorded at the Lagrangian point $L_1$ (distant from the Earth by 1.5 million kilometers), referred to as {\em effect series}. 
 The key difficulty is that the time lag between the solar images and the solar wind recorded at $L_1$ is {\em varying} depending on the initial direction of emitted particles and their energy. Would the lag be constant, the solar wind prediction problem would boil down to a mainstream regression problem. The challenge here (formalized in section \ref{sec:formulation})
-is to predict, from the solar image $x[t]$ at time $t$ both {\em what} (the value of the solar wind speed) and {\em when} this solar wind speed will reach the earth: the task is to predict $y[t + \delta t]$ where both the value $y$ and the time lag $\delta t$ depend on $x[t]$. 
+is to predict, from the solar image $x[t]$ at time $t$ both {\em what} (the value of the solar wind speed) and {\em when} this solar wind speed will reach the earth: the task is to predict $y[t + \tau]$ where both the value $y$ and the time lag $\tau$ depend on $x[t]$. 
 
 
 This challenge constitutes a new ML problem to our best knowledge. Indeed, the modeling of dependencies among financial time series has been intensively tackled (see \cite{ZHOU2006195} for instance). When considering varying time lag, the approaches rely on dynamic time warping (DTW) \cite{SakoeShiba1978}. For instance, DTW is used in \cite{SignalDiffusion}, taking a Bayesian approach to achieve the temporal alignment of both series; however the authors limit themselves to linear relationships between the cause and effect time series, and they further assume slow varying time lags. More generally, the use of DTW in time series analysis relies on simplifying assumptions on the cause and effect series (same dimensionality and structure) and build upon available cost matrices for the temporal alignment. 
