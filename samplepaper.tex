@@ -74,6 +74,7 @@ CIRES, University of Colorado, Boulder, CO, USA}
 \end{abstract}
 
 \input{introduction}
+
 \section{Deterministic Formulation}\label{sec:formulation}
 
 Time lag inference is essentially a regression problem with two tasks. 
@@ -198,85 +199,47 @@ and the parameters through equations~(\ref{eq:hatpi}) and~(\ref{eq:var}). The ty
 in a simpler case where $\alpha_{ij} = \alpha\delta_{ij}$.
 
 
-
-
-
-\subsection{Linear stability analysis}
-Let $\Delta y_i^2(x)= \bigl(y_i-\hat y_i(x)\bigr)^2$ and
+\subsection{Linear stability analysis}\label{sec:stability}
+Let $\Delta y_i^2(x)= \bigl(y_i-\hat y_i(x)\bigr)^2$ and call
 \[
 \sigma_0^2 = \frac{1}{n}{\mathbb E}_{data}\Bigl(\sum_{i=1}^n \Delta y_i^2(x)\Bigr)
 \]
-denote the default mean square error of the predictor ${\hat {\bf y}}(x)$.
-There is a degenerate solution to these saddle point equations corresponding to $\hat p_i(x) = 1/n$, $\alpha_{ij}=0$ for all
-pairs $(i,j)$ with $\sigma^2=\sigma_0^2$. Various situations can potentially occur depending on whether this solution corresponds to a (local) maximum, a saddle point or a (local) 
-minimum. For instance if this is the only solution, then this indicates that this is the unique global maximum of the likelihood, which means that the model is not able to learn
-anything from the data, these being to noisy. If instead it is a local minimum or a saddle point then a slight perturbation can drive us toward a meaningful solution corresponding to finite $\alpha$.
-The  case when the degenerate solution is a local maximum is then more involve since in that case a bad initialization of the gradient ascent can drive us to the wrong solution.
-Let us first examine this question by a linear stability analysis, i.e. by looking at the Hessian at this degenerate saddle point. To simplify the analysis
+the default mean square error of the predictor ${\hat {\bf y}}(x)$.
+There is a degenerate solution to the saddle point equations (\ref{eq:var},\ref{eq:hatpi},\ref{eq:tildep}) corresponding to $\hat p_i(x) = 1/n$, $\alpha_{ij}=0$ for all
+pairs $(i,j)$ with $\sigma^2=\sigma_0^2$. Intuitively the model could converge to this solution when the set of predictors are not specific enough.
+It would be therefore interesting to identify the conditions under which this degenerate solution may appear. For this we can compute the Hessian and check its eigenvalues.
+To simplify the analysis
 we restrict the analysis to the set of parameters
 \[
 \alpha_{ij} = \alpha \delta_{ij},
 \]
-which leaves us with only two parameters $\alpha$ and $r = \sigma^2/\sigma_0^2$. The log likelihood as a function of $r$ and $\alpha$ after inserting the optimal
-${\bf p} = {\bf p}(x,{\bf y})$ reads in that case
-\[
-{\cal L}(r,\alpha) = -\frac{n}{2}\log(r)-\frac{n}{2r}+{\mathbb E}_{data}\Bigl(\log(Z)\Bigr)
-\]
-with
-\[
-Z = \sum_i \hat p_i(x)\exp\Bigl(-\frac{\alpha}{2r\sigma_0^2}\Delta y_i^2(x)+\frac{1}{2}\log(1+\alpha)\Bigr).
-\]
-The gradient reads
+which leaves us with only two parameters $\alpha$ and $r = \sigma^2/\sigma_0^2$. Leaving the details for the Appendix~\ref{app:Hessian},
+the situation can be summarized as follows. There are two key statistical quantities:
+\begin{align}
+C_1[{\bf p}] &= \frac{1}{\sigma_0^2}{\mathbb E}_{data}\Bigl(\sum_{i=1}^n p_i(x,{\bf y})\Delta y_i^2(x)\Bigr),\label{def:C1}\\[0.2cm]
+C_2[{\bf p}] &= \frac{1}{\sigma_0^4}{\mathbb E}_{data}\Bigl[\sum_{i=1}^n p_i(x,{\bf y})\Bigl(\Delta y_i^2(x)-\sum_{j=1}^np_j(x,{\bf y})\Delta y_j^2(x)\Bigr)^2\Bigr].\label{def:C2}
+\end{align}
+$C_1$ represents the covariance between the latent variables $\{\tau_i\}$ and the normalized predictor errors. $C_1$ smaller than one 
+indicates a positive correlation between the latent variables and small errors. At the degenerate point, i.e. ${\bf p}={\bf p}_{0}$ uniform, $C_1[{\bf p}_{0}]=1$ and $C_2[{\bf p}_{0}]$
+represents the default variability among the predictor errors.
+At a saddle point the parameters are given by:
 \begin{align*}
-  \frac{\partial {\cal L}}{\partial r} &= \frac{n}{2r^2}\Bigl(1-r+\frac{\alpha}{n}C_1[{\bf p}]\Bigr),\\[0.2cm]
-  \frac{\partial {\cal L}}{\partial \alpha} &= \frac{1}{2(1+\alpha)}-\frac{1}{2r}C_1[{\bf p}],  
-\end{align*}
-with
-\[
-C_1[{\bf p}] = \frac{1}{\sigma_0^2}{\mathbb E}_{data}\Bigl(\sum_{i=1}^n p_i(x,{\bf y})\Delta y_i^2(x)\Bigr),
-\]
-the covariance between ${\bf \tau}$ and the normalized predictor errors. $C_1$ smaller than one 
-indicates a positive correlation between the latent variables and small error. 
-This leads to the following relation at the saddle point:
-\begin{align*}
-  r &= \frac{n-C_1[{\bf p}]}{n-1}\\[0.2cm]
+\frac{\sigma^2}{\sigma_0^2} &= \frac{n-C_1[{\bf p}]}{n-1} \\[0.2cm]
 \alpha &= \frac{n}{n-1}\frac{1-C_1[{\bf p}]}{C_1[{\bf p}]}.
 \end{align*}
-Let us now compute the Hessian. Denoting
+Such a saddle point is stable whenever
 \[
-C_2[{\bf p}] = \frac{1}{\sigma_0^4}{\mathbb E}_{data}\Bigl[\sum_{i=1}^n p_i(x,{\bf y})\Bigl(\Delta y_i^2(x)-\sum_{j=1}^np_j(x,{\bf y})\Delta y_j^2(x)\Bigr)^2\Bigr],
+C_2[{\bf p}] < 2C_1[{\bf p}]+{\cal O}\bigl(\frac{1}{n}\bigr).
 \]
-we have
-\begin{align*}
-\frac{\partial^2 {\cal L}}{\partial r^2} &= -\frac{n}{2r^2}\Bigl(1+2\frac{1-r}{r}+\frac{2\alpha}{nr}C_1[{\bf p}]-\frac{\alpha^2}{2nr^2}C_2[{\bf p}]\Bigr)\\[0.2cm]
-\frac{\partial^2 {\cal L}}{\partial r\partial \alpha} &=\frac{1}{2r^2}\Bigl(C_1[{\bf p}]-\frac{\alpha}{2r}C_2[{\bf p}]\Bigr)\\[0.2cm]
-\frac{\partial^2 {\cal L}}{\partial \alpha^2} &= -\frac{1}{2(1+\alpha)^2}+\frac{1}{4r^2}C_2[{\bf p}]. 
-\end{align*}
-As a result, the Hessian evaluated at the degenerate point $\alpha=0$, $r=1$, $\hat  p_i=1/n$ uniform reads
+In particular the condition for the degenerate point to be unstable is
 \[
-H =\frac{1}{2}
-\left[
-  \begin{matrix}
- -n & 1\\[0.4cm] 
- 1 & \qquad\DD \frac{C_2}{2}-1
-  \end{matrix}
-  \right]
-\]
-where
-\[
-C_2 = \frac{1}{n\sigma_0^4}{\mathbb E}_{data}\Bigl[\sum_{i=1}^n \Bigl(\Delta y_i^2(x)-\frac{1}{n}\sum_{j=1}^n\Delta y_j^2(x)\Bigr)^2\Bigr].
-\]
-In order to insure that the degenerate point is not a local maximum, we need that at least one of the eigenvalues of the Hessian be positive.
-The opposite situation occurs when the trace of $H$ is negative and the determinant is positive, so to avoid that we need
-\[
-C_2 > 2\bigl(1-\frac{1}{n}\bigr).
+C_2[{\bf p}_0] > 2\bigl(1-\frac{1}{n}\bigr).
 \]
 Note that for $\Delta y_i^2(x)$ iid with variance $\sigma_0^2$ and relative kurtosis $\kappa$ (conditionally to $x$)
-we have $C_2 = (2+\kappa)(1-1/n)$.
-As a result, as soon as there are variations among the $\Delta y_i^2(x)$ with non-negative relative kurtosis ($\kappa=0$ for a Normal variable)
+we have $C_2 = (2+\kappa)(1-1/n)$. As a result, as soon as there are fluctuations among the $\Delta y_i^2(x)$ with non-negative relative kurtosis ($\kappa=0$ for a normal variable)
 the  degenerate solution will be unstable.
 
-\subsection{Loss function and associated optimal predictor}
+\subsection{Loss function and related optimal predictor}
 Once the set $\hat {\bf y}(x)$ of predictors is learned and assuming that the correct parameters for~(\ref{eq:py}) have been found
 we would like to know given $x$, what is the optimal predictor for $y_i(x)$. Any predictor has  to come in a composite form
 $\hat z(x) = (\hat y(x),\hat I(x))$ where $\hat I(x)$ is the predicted index and $\hat y(x)$ the predicted value.
@@ -286,44 +249,20 @@ which we specify as an $L_2$ norm:
 {\cal L}(\hat y,\hat I) = {\mathbb E}_{data}\Bigl[\bigl(y_{\hat I(x)}-\hat y(x)\bigr)^2\Bigr]. 
 \]
 Then we have the following statement:
-\begin{prop}
+\begin{prop}\label{prop:opred}
 Based on~(\ref{eq:py}), with $\alpha_{ij} = \alpha\delta_{ij},\ \alpha>0$, the optimal composite predictor $(y^\star,I^\star)$ is given by
 \[
 y^\star(x) = \hat y_{I^\star(x)}(x)\qquad\text{with}\qquad I^\star(x) = \argmax_{i} \bigl(\hat p_i(x)\bigr), 
 \]
 \end{prop}
 \begin{proof}
-Given $I(x)$ a candidate index function we associate the point-like measure
-\[
-p_i(x) = \delta_{i,I(x)}.
-\]
-Written in terms of $p$ the loss function reads
-\[
-{\cal L}(\hat y,p) = {\mathbb E}_{x,{\bf y}}\Bigl[\sum_{i=1}^n p_i(x)\bigl(y_i-\hat y(x)\bigr)^2\Bigr].
-\]
-Under~(\ref{eq:py}) (with $\alpha_{ij}=\alpha\delta_{ij}$) the loss is equal to
-\[
-{\cal L}(\hat y,p) = {\mathbb E}_x\Bigl[\sum_{i=1}^n p_i(x)\Bigl( \bigl(\hat y_i(x)-\hat y(x)\bigr)^2-\hat p_i(x)\frac{\alpha\sigma^2}{1+\alpha}\Bigr)\Bigr]+\sigma^2
-\]
-The minimization w.r.t. $\hat y$ yields
-\begin{equation}\label{eq:hy}
-\hat y(x) = \sum_{i=1}^n p_i(x)\hat y_i(x).
-\end{equation}
-In turn, as a function of $p_i$ the loss being a  convex combination, its minimization yields
-\begin{align}
-  p_i(x) &= \delta_{i,I(x)},\label{eq:hp}\\[0.2cm]
-  I(x) &= \argmin_i\Bigl(\bigl(\hat y_i(x)-\hat y(x)\bigr)^2-\hat p_i(x)\frac{\alpha\sigma^2}{1+\alpha}\Bigr).\label{eq:hI}
-\end{align}
-Combining these equations~(\ref{eq:hy},\ref{eq:hp},\ref{eq:hI}) we get
-\[
-I(x) = \argmax_i\bigl(\hat p_i(x)\bigr),
-\]
-which concludes the proof.  
+See Appendix~\ref{app:opred}
 \end{proof}
 
 Since $\hat {\bf p}$ is self-consistently determined by~(\ref{eq:tildep}) along with equation~(\ref{eq:var}), what is needed from the practical point of view is to be able
 to solve two  regression problems, namely $\hat {\bf y}(x)$ and $\hat {\bf p}(x)$ from a set of observations $\{(x^{m},{\bf y}^{m})\}$ with a given set of parameters ${\bf \alpha}$
-and $\sigma^2$ in order then to be able to iterate the saddle point equations.
+and $\sigma^2$ in order then to be able to iterate the saddle point equations. The practical implementation of this framework will be described in the next section.
+
 
 
 \section{Proposed Solution}\label{sec:model}
@@ -811,6 +750,122 @@ surface of the Sun, i.e. sunspots and active regions.
 
 
 \subsubsection*{Acknowledgements}
+
+\begin{appendix}
+\section{Log likelihood of the latent model~(\ref{eq:py})}\label{app:LL}
+Assume that the number of learning samples tends to infinity, and so that in a small volume $dv = dxd{\bf y}$ around a given  joint configuration $(x,{\bf y})$,
+the number of data $N_{x,{\bf y}}$ becomes large. Restricting the likelihood to this subset of the data yields the following:
+\[
+{\cal L}_{x,{\bf y}} = \prod_{m=1}^{N_{x,{\bf y}}} \sum_{\{\tau^{(m)}\}} 
+\frac{\hat p(\tau^{(m)}\vert x)}{\prod_{i=1}^n\sqrt{2\pi}\ \sigma_i(\tau^{(m)})}
+\exp\Bigl(-\frac{1}{2}\sum_{i=1}^n\frac{\bigl(y_i-\hat y_i(x)\bigr)^2}{\sigma_i(\tau^{(m)})^2}\Bigr).
+\]
+Upon introducing the relative frequencies:
+\[
+p_i(x,{\bf y}) = \frac{1}{N_{x,{\bf y}}}\sum_{m=1}^{N_{x,{\bf y}}} \tau_i^{(m)} 
+\]
+satisfying 
+\begin{equation}\label{eq:cs2}
+\sum_{i=1}^n p_i(x,{\bf y}) = 1,
+\end{equation}
+the sum over the $\tau_i^{(m)}$ is replaced by a sum over these new variables, with the summand obeying a large deviation principle (see e.g.~\cite{Touchette})
+\[
+{\cal L}_{x,{\bf y}} \asymp \sum_{{\bf p}} 
+\exp\Bigl(-N_{x,{\bf y}} {\cal F}_{x,{\bf y}}\bigl[{\bf p}\bigr]\Bigr)
+\]
+where the rate function simply reads from Sanov's theorem
+\[
+{\cal F}_{x,{\bf y}}\bigl[\{p\}\bigr] = n\log(\sigma)+
+\sum_{i=1}^n\Bigl[\bigl(y_i-\hat y_i(x)\bigr)^2\frac{1+\sum_j\alpha_{ij}p_j}{2\sigma^2}
+-\frac{1}{2}p_i\sum_j\log(1+\alpha_{ji})+p_i\log\frac{p_i}{\hat p_i}\Bigr].
+\]
+Taking the saddle point for $p_i$ yield as a function of $(x,{\bf y})$ expression~(\ref{eq:hatpi}). Inserting this into ${\cal F}$ and taking
+the average over the data set yield the log likelihood~(\ref{eq:LL}) with opposite sign. 
+$\hat p$ is also subject of being optimized. We have
+\[
+\frac{\partial{\cal L}}{\partial \hat p_i(x)} = {\mathbb E}_{data,y}\Bigl[\frac{p_i(x,{\bf y})}{\hat p(x)}-\lambda(x)\Bigr],
+\]
+with $\lambda(x)$ a Lagrange multiplier to insure that $\sum_i\hat p_i(x)=1$ for any $x$ yielding expression~(\ref{eq:tildep}).
+
+\section{Stability analysis}\label{app:Hessian}
+The log likelihood as a function of $r$ and $\alpha$ after inserting the optimal
+${\bf p} = {\bf p}(x,{\bf y})$ reads in that case
+\[
+{\cal L}(r,\alpha) = -\frac{n}{2}\log(r)-\frac{n}{2r}+{\mathbb E}_{data}\Bigl(\log(Z)\Bigr)
+\]
+with
+\[
+Z = \sum_i \hat p_i(x)\exp\Bigl(-\frac{\alpha}{2r\sigma_0^2}\Delta y_i^2(x)+\frac{1}{2}\log(1+\alpha)\Bigr).
+\]
+The gradient reads
+\begin{align*}
+  \frac{\partial {\cal L}}{\partial r} &= \frac{n}{2r^2}\Bigl(1-r+\frac{\alpha}{n}C_1[{\bf p}]\Bigr),\\[0.2cm]
+  \frac{\partial {\cal L}}{\partial \alpha} &= \frac{1}{2(1+\alpha)}-\frac{1}{2r}C_1[{\bf p}],  
+\end{align*}
+with
+\[
+C_1[{\bf p}] = \frac{1}{\sigma_0^2}{\mathbb E}_{data}\Bigl(\sum_{i=1}^n p_i(x,{\bf y})\Delta y_i^2(x)\Bigr),
+\]
+This leads to the following relation at the saddle point:
+\begin{align*}
+  r &= \frac{n-C_1[{\bf p}]}{n-1}\\[0.2cm]
+\alpha &= \frac{n}{n-1}\frac{1-C_1[{\bf p}]}{C_1[{\bf p}]}.
+\end{align*}
+Let us now compute the Hessian. Denoting
+\[
+C_2[{\bf p}] = \frac{1}{\sigma_0^4}{\mathbb E}_{data}\Bigl[\sum_{i=1}^n p_i(x,{\bf y})\Bigl(\Delta y_i^2(x)-\sum_{j=1}^np_j(x,{\bf y})\Delta y_j^2(x)\Bigr)^2\Bigr],
+\]
+we have
+\begin{align*}
+\frac{\partial^2 {\cal L}}{\partial r^2} &= -\frac{n}{2r^2}\Bigl(1+2\frac{1-r}{r}+\frac{2\alpha}{nr}C_1[{\bf p}]-\frac{\alpha^2}{2nr^2}C_2[{\bf p}]\Bigr)\\[0.2cm]
+\frac{\partial^2 {\cal L}}{\partial r\partial \alpha} &=\frac{1}{2r^2}\Bigl(C_1[{\bf p}]-\frac{\alpha}{2r}C_2[{\bf p}]\Bigr)\\[0.2cm]
+\frac{\partial^2 {\cal L}}{\partial \alpha^2} &= \frac{1}{4r^2}\Bigl(C_2[{\bf p}]-2C_1[{\bf p}]\Bigr). 
+\end{align*}
+As a result, the Hessian evaluated at the degenerate point $\alpha=0$, $r=1$, $\hat  p_i=1/n$ uniform reads
+\[
+H =\frac{1}{2}
+\left[
+  \begin{matrix}
+ -n & 1\\[0.4cm] 
+ 1 & \qquad\DD \frac{C_2}{2}-1
+  \end{matrix}
+  \right]
+\]
+where
+\[
+C_2 = \frac{1}{n\sigma_0^4}{\mathbb E}_{data}\Bigl[\sum_{i=1}^n \Bigl(\Delta y_i^2(x)-\frac{1}{n}\sum_{j=1}^n\Delta y_j^2(x)\Bigr)^2\Bigr].
+\]
+
+\section{Proof of Proposition~\ref{prop:opred}}\label{app:opred}
+Given $I(x)$ a candidate index function we associate the point-like measure
+\[
+p_i(x) = \delta_{i,I(x)}.
+\]
+Written in terms of $p$ the loss function reads
+\[
+{\cal L}(\hat y,p) = {\mathbb E}_{x,{\bf y}}\Bigl[\sum_{i=1}^n p_i(x)\bigl(y_i-\hat y(x)\bigr)^2\Bigr].
+\]
+Under~(\ref{eq:py}) (with $\alpha_{ij}=\alpha\delta_{ij}$) the loss is equal to
+\[
+{\cal L}(\hat y,p) = {\mathbb E}_x\Bigl[\sum_{i=1}^n p_i(x)\Bigl( \bigl(\hat y_i(x)-\hat y(x)\bigr)^2-\hat p_i(x)\frac{\alpha\sigma^2}{1+\alpha}\Bigr)\Bigr]+\sigma^2
+\]
+The minimization w.r.t. $\hat y$ yields
+\begin{equation}\label{eq:hy}
+\hat y(x) = \sum_{i=1}^n p_i(x)\hat y_i(x).
+\end{equation}
+In turn, as a function of $p_i$ the loss being a  convex combination, its minimization yields
+\begin{align}
+  p_i(x) &= \delta_{i,I(x)},\label{eq:hp}\\[0.2cm]
+  I(x) &= \argmin_i\Bigl(\bigl(\hat y_i(x)-\hat y(x)\bigr)^2-\hat p_i(x)\frac{\alpha\sigma^2}{1+\alpha}\Bigr).\label{eq:hI}
+\end{align}
+Combining these equations~(\ref{eq:hy},\ref{eq:hp},\ref{eq:hI}) we get
+\[
+I(x) = \argmax_i\bigl(\hat p_i(x)\bigr),
+\]
+which concludes the proof.  
+
+\end{appendix}
+
 
 \clearpage
 \bibliography{references}

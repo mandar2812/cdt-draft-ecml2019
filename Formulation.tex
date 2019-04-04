@@ -1,0 +1,52 @@
+\section{Position of the problem}\label{sec:formulation}
+
+Time lag inference is essentially a regression problem with two tasks. 
+Given two time series, the causes $x(t)$ and the observed effects $y(t)$, the regression model 
+must learn a mapping $f(.)$ which maps each input pattern $x(t_1)$ to an output $y(t_2)$, and a 
+mapping $g(.)$ which maps the time delay between the input and output patterns $t_2 = t_1 + g(x(t_1))$. 
+This is formally specified in equations below.
+
+\begin{align}
+y(t + \tau(t)) & = f[x(t)]\label{eq:pb1}\\
+\tau(t) & = g[x(t)]\label{eq:pb2} 
+\end{align}
+with
+\[
+f: \mathcal{X}  \rightarrow \mathbb{R},\qquad\text{and}\qquad
+g: \mathcal{X}  \rightarrow \mathbb{R}^{+},
+\]
+$t \in \mathbb{R}^{+}$ represents the continuous temporal domain. The input signal 
+$x(t)\in \mathcal{X}$ is possibly high dimensional and contains the hidden cause to 
+the effect $y(t)\in\mathbb{R}$ which is considered as a scalar in this paper. 
+$\tau(t)\in \mathbb{R}^+$ represents the time delay between inputs and outputs.
+
+It is important to note some caveats about this time lag which make this inference problem 
+different from classical time series regression problems.
+
+Firstly, the time lag $\tau(t)$ can be \emph{non-stationary} i.e. dependent on the input $x(t)$. 
+Secondly, in practical applications such as the motivating space weather example, $\tau(t)$ 
+is not recorded explicitly in the training data. This makes model training and evaluation 
+challenging.
+
+One may make certain assumptions on the time warping function $\phi(t) = t + \tau(t)$, in the general 
+formulation of the problem presented here: 
+
+\begin{enumerate}
+    \item $\phi(.)$ is assumed to be continuous and \emph{bijective}.
+    \item Zhou \& Sornette \cite{ZHOU2006195} enforce further assumptions 
+          such as $\phi(t_1) \leq \phi(t_2), \forall t_1 \leq t_2$, which 
+          are incorporated via constraints. This approach respects the 
+          properties associated with the warping function $\phi(.)$ but 
+          increase the computational complexity of the resulting 
+          optimization problem.
+\end{enumerate}
+
+The second assumption can be restrictive for applications in space physics, where fast moving 
+solar wind can reach the Earth before slow moving solar wind which departed before it. 
+
+In practical time-series applications, one works with sub-sampled or discretized versions of the time 
+series $x(t)$ and $y(t)$. In this case the map $g(.)$ is replaced by its discrete analogue 
+$g(.):\mathcal{X}  \rightarrow \mathbb{N}$. 
+
+Henceforth we will work with the discretized time series $x^m$ and $y^m$.
+
