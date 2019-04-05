@@ -411,6 +411,14 @@ and evaluated using the following charts.
           in time lag. They help in visualizing the shape of the error distribution.
 \end{enumerate}
 
+Apart from the standard performance metrics such as R.M.S.E, M.A.E and Pearson correlation,
+we attach the values of $\sigma_0$ and $C_1$ introduced in section \ref{sec:stability}.
+
+The value of $\sigma_0$ gives a base line to compare the R.M.S.E scores of the model, 
+in fact an R.M.S.E score less than $\sigma_0$ and $C_1 < 1$ indicates that the model 
+performs better than a naive predictor which assigns a probability of $\frac{1}{n}$ 
+to each candidate model $\hat{y}_i(x)$, regardless of the input $x$.
+
 \begin{table}
   \caption{Performance: Output (Time Lag) Prediction}\label{tab:results_syn}
   \centering
