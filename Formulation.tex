@@ -16,7 +16,7 @@ In the remainder of the paper, only the discrete time NSDR problem is considered
 Let $x(t)$ and $y(t)$ be measured for $t \in 1 \ldots T$, and let us assume that $\tau(t)$ varies in some known interval. With no loss of generality let this interval be set to $[1, n]$. The proposed approach  consists of learning a set of $n$ models $\hat y_i: \mathcal{X} \mapsto \mathcal{R}$, for $i=1,\ldots n$, and a set of $n$ functions $\hat p_i:  \mathcal{X} \mapsto [0,1]$ such that $p_i(x)$ indicates the probability for $\hat y_i$ to be the right model for $x$, subject to  $\sum_i \hat p_i(x) = 1$.
 
 Formally, one defines:
-\[ P(y(t | x) = 
+\[ P(y(t') | \x) = \sum_{i=1}^n \hat p_i(x(t'-i)). \hat y_i(x(t'-i)) \] 
 associated to a fixed horizon indexed by $i$, along with a set
 of probabilistic weights $\{\hat p_i(x),i=1,\ldots n\}$ summing to one, indicating for a given input $x$ the probability for each horizon $i$
 to be the correct one. These weights naturally arise from a latent variable model that we describe now.
