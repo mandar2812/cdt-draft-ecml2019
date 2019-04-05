@@ -172,7 +172,7 @@ with
 \[
 \sum_{i=1}^n \hat p_i(x) = 1.
 \]
-The log likelihood associated to this joint measure is (see appendix~\ref{app:LL}):
+The log likelihood associated to this joint measure is: %(see appendix~\ref{app:LL}):
 \begin{equation}\label{eq:LL}
 {\cal L}\bigl[\hat {\bf y},\sigma,{\bf \alpha}] = -\frac{n}{2}\log(\sigma)-{\mathbb E}_{data}\Bigl[\frac{1}{2\sigma^2}\sum_{i=1}^n\bigl(y_i-\hat y_i(x)\bigr)^2
 -\log\bigl(Z(\sigma,{\bf \alpha})\bigr)\Bigr],
@@ -190,7 +190,7 @@ by means of the conditional probability $P(\tau_i=1\vert x,{\bf y})$ which reads
 p_i(x,{\bf y}) = \frac{1}{Z(\sigma,{\bf \alpha})}\hat p_i(x)\exp\Bigl(-\frac{1}{2\sigma^2}\sum_j\alpha_{ji}\bigl(y_j-\hat y_j(x)\bigr)^2+\frac{1}{2}\sum_j\log(1+\alpha_{ji})\Bigr).
 \end{equation}
 These are implicit equations, since ${\bf p}(x,{\bf y})$ depends on the parameters $\sigma^2$ and $\alpha_{ij}$.
-In addition the optimal $\hat {\bf p}$ reads (see appendix~\ref{app:LL})
+In addition the optimal $\hat {\bf p}$ reads:%(see appendix~\ref{app:LL})
 \begin{equation}\label{eq:tildep}
 \hat p_i(x) = {\mathbb E}_{data,y}\Bigl[p_i(x,{\bf y})\Bigr].
 \end{equation}
@@ -214,7 +214,7 @@ we restrict the analysis to the set of parameters
 \[
 \alpha_{ij} = \alpha \delta_{ij},
 \]
-which leaves us with only two parameters $\alpha$ and $r = \sigma^2/\sigma_0^2$. Leaving the details for the Appendix~\ref{app:Hessian},
+which leaves us with only two parameters $\alpha$ and $r = \sigma^2/\sigma_0^2$. Leaving aside the details of the computation, %for the Appendix~\ref{app:Hessian},
 the situation can be summarized as follows. There are two key statistical quantities:
 \begin{align}
 C_1[{\bf p}] &= \frac{1}{\sigma_0^2}{\mathbb E}_{data}\Bigl(\sum_{i=1}^n p_i(x,{\bf y})\Delta y_i^2(x)\Bigr),\label{def:C1}\\[0.2cm]
@@ -637,117 +637,9 @@ surface of the Sun, i.e. sunspots and active regions.
 \subsubsection*{Acknowledgements}
 
 \begin{appendix}
-\section{Log likelihood of the latent model~(\ref{eq:py})}\label{app:LL}
-Assume that the number of learning samples tends to infinity, and so that in a small volume $dv = dxd{\bf y}$ around a given  joint configuration $(x,{\bf y})$,
-the number of data $N_{x,{\bf y}}$ becomes large. Restricting the likelihood to this subset of the data yields the following:
-\[
-{\cal L}_{x,{\bf y}} = \prod_{m=1}^{N_{x,{\bf y}}} \sum_{\{\tau^{(m)}\}} 
-\frac{\hat p(\tau^{(m)}\vert x)}{\prod_{i=1}^n\sqrt{2\pi}\ \sigma_i(\tau^{(m)})}
-\exp\Bigl(-\frac{1}{2}\sum_{i=1}^n\frac{\bigl(y_i-\hat y_i(x)\bigr)^2}{\sigma_i(\tau^{(m)})^2}\Bigr).
-\]
-Upon introducing the relative frequencies:
-\[
-p_i(x,{\bf y}) = \frac{1}{N_{x,{\bf y}}}\sum_{m=1}^{N_{x,{\bf y}}} \tau_i^{(m)} 
-\]
-satisfying 
-\begin{equation}\label{eq:cs2}
-\sum_{i=1}^n p_i(x,{\bf y}) = 1,
-\end{equation}
-the sum over the $\tau_i^{(m)}$ is replaced by a sum over these new variables, with the summand obeying a large deviation principle (see e.g.~\cite{Touchette})
-\[
-{\cal L}_{x,{\bf y}} \asymp \sum_{{\bf p}} 
-\exp\Bigl(-N_{x,{\bf y}} {\cal F}_{x,{\bf y}}\bigl[{\bf p}\bigr]\Bigr)
-\]
-where the rate function simply reads from Sanov's theorem
-\[
-{\cal F}_{x,{\bf y}}\bigl[\{p\}\bigr] = n\log(\sigma)+
-\sum_{i=1}^n\Bigl[\bigl(y_i-\hat y_i(x)\bigr)^2\frac{1+\sum_j\alpha_{ij}p_j}{2\sigma^2}
--\frac{1}{2}p_i\sum_j\log(1+\alpha_{ji})+p_i\log\frac{p_i}{\hat p_i}\Bigr].
-\]
-Taking the saddle point for $p_i$ yield as a function of $(x,{\bf y})$ expression~(\ref{eq:hatpi}). Inserting this into ${\cal F}$ and taking
-the average over the data set yield the log likelihood~(\ref{eq:LL}) with opposite sign. 
-$\hat p$ is also subject of being optimized. We have
-\[
-\frac{\partial{\cal L}}{\partial \hat p_i(x)} = {\mathbb E}_{data,y}\Bigl[\frac{p_i(x,{\bf y})}{\hat p(x)}-\lambda(x)\Bigr],
-\]
-with $\lambda(x)$ a Lagrange multiplier to insure that $\sum_i\hat p_i(x)=1$ for any $x$ yielding expression~(\ref{eq:tildep}).
-
-\section{Stability analysis}\label{app:Hessian}
-The log likelihood as a function of $r$ and $\alpha$ after inserting the optimal
-${\bf p} = {\bf p}(x,{\bf y})$ reads in that case
-\[
-{\cal L}(r,\alpha) = -\frac{n}{2}\log(r)-\frac{n}{2r}+{\mathbb E}_{data}\Bigl(\log(Z)\Bigr)
-\]
-with
-\[
-Z = \sum_i \hat p_i(x)\exp\Bigl(-\frac{\alpha}{2r\sigma_0^2}\Delta y_i^2(x)+\frac{1}{2}\log(1+\alpha)\Bigr).
-\]
-The gradient reads
-\begin{align*}
-  \frac{\partial {\cal L}}{\partial r} &= \frac{n}{2r^2}\Bigl(1-r+\frac{\alpha}{n}C_1[{\bf p}]\Bigr),\\[0.2cm]
-  \frac{\partial {\cal L}}{\partial \alpha} &= \frac{1}{2(1+\alpha)}-\frac{1}{2r}C_1[{\bf p}],  
-\end{align*}
-with
-\[
-C_1[{\bf p}] = \frac{1}{\sigma_0^2}{\mathbb E}_{data}\Bigl(\sum_{i=1}^n p_i(x,{\bf y})\Delta y_i^2(x)\Bigr),
-\]
-This leads to the following relation at the saddle point:
-\begin{align*}
-  r &= \frac{n-C_1[{\bf p}]}{n-1}\\[0.2cm]
-\alpha &= \frac{n}{n-1}\frac{1-C_1[{\bf p}]}{C_1[{\bf p}]}.
-\end{align*}
-Let us now compute the Hessian. Denoting
-\[
-C_2[{\bf p}] = \frac{1}{\sigma_0^4}{\mathbb E}_{data}\Bigl[\sum_{i=1}^n p_i(x,{\bf y})\Bigl(\Delta y_i^2(x)-\sum_{j=1}^np_j(x,{\bf y})\Delta y_j^2(x)\Bigr)^2\Bigr],
-\]
-we have
-\begin{align*}
-\frac{\partial^2 {\cal L}}{\partial r^2} &= -\frac{n}{2r^2}\Bigl(1+2\frac{1-r}{r}+\frac{2\alpha}{nr}C_1[{\bf p}]-\frac{\alpha^2}{2nr^2}C_2[{\bf p}]\Bigr)\\[0.2cm]
-\frac{\partial^2 {\cal L}}{\partial r\partial \alpha} &=\frac{1}{2r^2}\Bigl(C_1[{\bf p}]-\frac{\alpha}{2r}C_2[{\bf p}]\Bigr)\\[0.2cm]
-\frac{\partial^2 {\cal L}}{\partial \alpha^2} &= \frac{1}{4r^2}\Bigl(C_2[{\bf p}]-2C_1[{\bf p}]\Bigr). 
-\end{align*}
-As a result, the Hessian evaluated at the degenerate point $\alpha=0$, $r=1$, $\hat  p_i=1/n$ uniform reads
-\[
-H =\frac{1}{2}
-\left[
-  \begin{matrix}
- -n & 1\\[0.4cm] 
- 1 & \qquad\DD \frac{C_2}{2}-1
-  \end{matrix}
-  \right]
-\]
-where
-\[
-C_2 = \frac{1}{n\sigma_0^4}{\mathbb E}_{data}\Bigl[\sum_{i=1}^n \Bigl(\Delta y_i^2(x)-\frac{1}{n}\sum_{j=1}^n\Delta y_j^2(x)\Bigr)^2\Bigr].
-\]
-
-\section{Proof of Proposition~\ref{prop:opred}}\label{app:opred}
-Given $I(x)$ a candidate index function we associate the point-like measure
-\[
-p_i(x) = \delta_{i,I(x)}.
-\]
-Written in terms of $p$ the loss function reads
-\[
-{\cal L}(\hat y,p) = {\mathbb E}_{x,{\bf y}}\Bigl[\sum_{i=1}^n p_i(x)\bigl(y_i-\hat y(x)\bigr)^2\Bigr].
-\]
-Under~(\ref{eq:py}) (with $\alpha_{ij}=\alpha\delta_{ij}$) the loss is equal to
-\[
-{\cal L}(\hat y,p) = {\mathbb E}_x\Bigl[\sum_{i=1}^n p_i(x)\Bigl( \bigl(\hat y_i(x)-\hat y(x)\bigr)^2-\hat p_i(x)\frac{\alpha\sigma^2}{1+\alpha}\Bigr)\Bigr]+\sigma^2
-\]
-The minimization w.r.t. $\hat y$ yields
-\begin{equation}\label{eq:hy}
-\hat y(x) = \sum_{i=1}^n p_i(x)\hat y_i(x).
-\end{equation}
-In turn, as a function of $p_i$ the loss being a  convex combination, its minimization yields
-\begin{align}
-  p_i(x) &= \delta_{i,I(x)},\label{eq:hp}\\[0.2cm]
-  I(x) &= \argmin_i\Bigl(\bigl(\hat y_i(x)-\hat y(x)\bigr)^2-\hat p_i(x)\frac{\alpha\sigma^2}{1+\alpha}\Bigr).\label{eq:hI}
-\end{align}
-Combining these equations~(\ref{eq:hy},\ref{eq:hp},\ref{eq:hI}) we get
-\[
-I(x) = \argmax_i\bigl(\hat p_i(x)\bigr),
-\]
-which concludes the proof.  
+%\input{AppendixA.tex}
+%\input{AppendixB.tex}
+\input{AppendixC.tex}
 
 \end{appendix}
 
