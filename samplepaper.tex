@@ -172,10 +172,10 @@ with
 \sum_{i=1}^n \hat p_i(x) = 1.
 \]
 The log likelihood associated to this joint measure is (see appendix~\ref{app:LL}):
-\[
+\begin{equation}\label{eq:LL}
 {\cal L}\bigl[\hat {\bf y},\sigma,{\bf \alpha}] = -\frac{n}{2}\log(\sigma)-{\mathbb E}_{data}\Bigl[\frac{1}{2\sigma^2}\sum_{i=1}^n\bigl(y_i-\hat y_i(x)\bigr)^2
 -\log\bigl(Z(\sigma,{\bf \alpha})\bigr)\Bigr],
-\]
+\end{equation}
 with
 \[
 Z(\sigma,{\bf \alpha}) = \sum_{i=1}^n\hat p_i(x)\exp\Bigl(-\frac{1}{2\sigma^2}\sum_j\alpha_{ji}\bigl(y_j-\hat y_j(x)\bigr)^2+\frac{1}{2}\sum_j\log(1+\alpha_{ji})\Bigr).
@@ -282,7 +282,7 @@ two hidden layers, for prediction of outputs and time lags.
 \end{figure}
 In order to train it we retro-propagate the following loss function
 \begin{equation}
-\mathcal{J}(y^{(1:M)}, \hat{y}^{(1:M)}, \hat{p}^{(1:M)}) =
+\mathcal{L}(y^{(1:M)}, \hat{y}^{(1:M)}, \hat{p}^{(1:M)}) =
  \frac{1}{M}\sum_{i,m} \frac{1 + \alpha \hat{p}^{(m)}_i}{2\sigma^2}(y^{(m)}_{i} - \hat{y}^{(m)}_{i})^2   
 +  \hat{p}^{(m)}_{i}\log \left (\frac{\hat{p}^{(m)}_i}{\tilde{p}^{(m)}_i} \right).\label{eq:loss}
 \end{equation}
@@ -390,7 +390,7 @@ $\tau(t) = k$
 \newline $\tau(t) = (\sqrt{\alpha^2||x(t)||^4 + 2ad} - \alpha||x(t)||^2)/a,\ \alpha = \frac{50}{8},\ a = 5,\ d = 1000$
 
 \item \textbf{Problem IV} Softplus time lag: 
-\newline $\tau(t) = exp\left(||x(t)||^2\right)/\left(1 + exp(||x(t)||^2)\right)$
+\newline $\tau(t) = \exp\left(||x(t)||^2\right)/\left(1 + \exp(||x(t)||^2)\right)$
 
 \end{enumerate}
 
