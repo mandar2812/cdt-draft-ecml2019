@@ -346,33 +346,20 @@ of PDT modelling.
 
 \subsection{Data Generation}
 
-We start by generating the time series $x(t) \in \mathbb{R}^8$, of size $4000$ 
-(one copy for training and another for test), which represent the driving forces in our system. 
-This can be achieved with good flexibility using \emph{Stochastic Langevin Dynamics} as shown in 
+We start by generating the time series $x(t) \in \mathbb{R}^10$, 
+which represent the driving forces in our system. This can be achieved with 
+good flexibility using \emph{Stochastic Langevin Dynamics} as shown in 
 equation \ref{eq:data}.
 
 \begin{align}
- x(t + 1) &= (1 - \tau) x(t) + \mathcal{N}(0, \sigma^2) \label{eq:data}\\
- y(t + \tau(t)) &= \alpha ||x(t)||^2 \label{eq:outputs}
+ x(t + 1) &= (1 - \eta) x(t) + \mathcal{N}(0, s^2) \label{eq:data}\\
+ y(t + \tau(t)) &= k ||x(t)||^2 + c \label{eq:outputs}
 \end{align}
 
-In equation \ref{eq:outputs} we define the output $y(.)$ as the square norm of the appropriately 
+Equation \ref{eq:outputs} defines the output $y(.)$ as the square norm of the appropriately 
 time lagged input, where $\tau(t)$ determines the time lag relationship.
 
-\subsection{Generating Predictions}
-
-In all of the following benchmarks we set $n = 20$ as the width of the time lag window.
-
-To evaluate the model predictions for the benchmarks, we choose the 
-prediction $\hat{y}_j$ which has the highest probability of a temporal link 
-$j = {\argmax}_{i} \ \hat{p}_i \ \ i \in \{1,\ldots,n\}$. The predictions 
-$(\hat{y}_j, j)$ can now be compared to their corresponding ground truth values 
-$(y(t + \tau(t)), \tau(t))$. 
-
-When generating predictions for temporally successive test patters $x'(t)$, it is possible that our 
-model produces time gaps in the reconstruction of the test outputs $y'(t)$. This can happen due to 
-departure from the assumptions outlined in section \ref{sec:formulation}. We can get around these 
-gaps using linear interpolation.
+In each benchmark we set $\eta = 0.02, s^2 = 0.7$, for the data generation process.
 
 
 \subsection{Benchmark Problems}\label{sec:benchmark}
@@ -383,17 +370,16 @@ Based on the above framework we construct four benchmark problems.
 \item \textbf{Problem I} Constant Lag: \newline 
 $\tau(t) = k$
 
-\item \textbf{Problem II} Constant Velocity $\alpha ||x(t)||^2 + c$; Fixed Distance $d$: 
-\newline $\tau(t) = d/(\alpha ||x(t)||^2 + c),\ \alpha = \frac{100}{8},\ d = 1000,\ c = 40$
+\item \textbf{Problem II} Constant Velocity $v = k ||x(t)||^2 + c$; Fixed Distance $d$: 
+\newline $\tau(t) = d/v,\ k = 10,\ d = 1000,\ c = 40$
 
-\item \textbf{Problem III} Constant Acceleration $a$; Fixed Distance $d$: 
-\newline $\tau(t) = (\sqrt{\alpha^2||x(t)||^4 + 2ad} - \alpha||x(t)||^2)/a,\ \alpha = \frac{50}{8},\ a = 5,\ d = 1000$
+\item \textbf{Problem III} Initial Velocity $v = k ||x(t)||^2 + c$, Constant Acceleration $a$; Fixed Distance $d$: 
+\newline $\tau(t) = (\sqrt{v^2 + 2ad} - v)/a,\ k = 5,\ a = 5,\ d = 1000, c = 0$
 
-\item \textbf{Problem IV} Softplus time lag: 
-\newline $\tau(t) = \exp\left(||x(t)||^2\right)/\left(1 + \exp(||x(t)||^2)\right)$
+\item \textbf{Problem IV} Velocity $v = k ||x(t)||^2 + c$, Softplus time lag: 
+\newline $\tau(t) = \exp\left(v\right)/\left(1 + \exp(v)\right), \ k = 10, c = 40$
 
 \end{enumerate}
-
 
 
 \subsection{Results}
