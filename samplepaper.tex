@@ -53,7 +53,7 @@
 \author{Mandar Chandorkar\inst{1,2} \and
 Cyril Furtlehner\inst{2} \and
 Enrico Camporeale\inst{1,3} \and 
-Michele Sebag\inst{2}
+Mich\`ele Sebag\inst{2}
 }
 %
 \authorrunning{Chandorkar et al.}
@@ -61,14 +61,14 @@ Michele Sebag\inst{2}
 % If there are more than two authors, 'et al.' is used.
 %
 \institute{Centrum Wiskunde en Informatica, Amsterdam 1098XG, Netherlands \and
-TAO, CNRS $-$ INRIA $-$ Univ. Paris-Saclay, France\and
+TAU, CNRS $-$ INRIA $-$ Univ. Paris-Saclay, France\and
 CIRES, University of Colorado, Boulder, CO, USA}
 %
 \maketitle              % typeset the header of the contribution
 %
 \begin{abstract}
       We formalize the joint regression task of predicting the magnitude of signals as well as the time delay with respect to their driving phenomena. 
-      We call the problem \emph{probabilistic dynamic time lag} (PDT); to emphasize the uncertain and non-stationary time delay between the occurrence of 
+      We call the problem \emph{probabilistic dynamic time lag} (PDT) to emphasize the uncertain and non-stationary time delay between the occurrence of 
       causes/drivers and the observation of effects in physical and man-made systems. We propose a solution to the PDT problem and a methodology to 
       benchmark and evaluate probabilistic time lag estimation algorithms.
 \end{abstract}
@@ -132,8 +132,8 @@ Henceforth we will work with the discretized time series $x^m$ and $y^m$.
 Unlike the classical supervised learning problem, we cannot associate a time lagged output
 $y^{m + i}$ and input $x^m$ with absolute certainty. It is therefore beneficial to relax 
 the assumption of a deterministic time lag to a stochastic one. Our strategy consists of
-learning a set of independent predictors $\{\hat y_i(x),i=1,\ldots n\}$ associated to a fixed horizon indexed by $i$, along with a set
-of probabilistic weights $\{\hat p_i(x),i=1,\ldots n\}$ summing to one, indicating for a given input $x$ the probability for each horizon $i$
+learning a set of independent predictors $\{\hat y_i(x),i=1,\ldots n\}$ associated to a fixed time lag indexed by $i$, along with a set
+of probabilistic weights $\{\hat p_i(x),i=1,\ldots n\}$ summing to one, indicating for a given input $x$ the probability for each time lag $i$
 to be the correct one. These weights naturally arise from a latent variable model that we describe now.
 
 \subsection{Latent model and associated likelihood}\label{sec:latent}
@@ -152,9 +152,9 @@ with
 \[
 \sigma_i({\bf \tau})^{-2} = \Bigl(1+\sum_j\alpha_{ij} \tau_j\Bigr)\sigma^{-2},
 \]
-with $\sigma^2$ a default variance and $\alpha_{ij}\ge 0$ a matrix of non-negative real parameter. 
+with $\sigma^2$ a default variance and $\alpha_{ij}\ge 0$ a matrix of non-negative real parameters. 
 This is a local mixture model function of the input variable $x$. Its precise meaning is the following: for a given cause $x$ the effect
-$y_i$ at horizon $i$ has a normal distribution centered on $\hat y_i(x)$ with  variance $\sigma_i^2({\bf \tau})$ independent of $x$ as a simplifying assumption. $\{\tau_1,\ldots,\tau_n\}$ is a set of binary
+$y_i$ at horizon $i$ has a normal distribution centered on $\hat y_i(x)$ with  variance $\sigma_i^2({\bf \tau})$ (independent of $x$ as a simplifying assumption). $\{\tau_1,\ldots,\tau_n\}$ is a set of binary
 latent variables encoding the stochastic causal time lag, telling whether $x$ causes $y_i$ ($\tau_i=1$) or not ($\tau_i=0$). Since we expect a one to one correspondence between causes
 $x^{(m)}$ and effects $y^{m+i}$ we impose the constraint
 \begin{equation}\label{eq:cs1}
@@ -162,7 +162,8 @@ $x^{(m)}$ and effects $y^{m+i}$ we impose the constraint
 \end{equation}
 The fact that $x$ can influence $y_i$ through the bias $\hat y_i(x)$ even when $\tau_i=0$ reflects an indirect
 influence due to a finite auto-correlation time of $y_t$. But this should come with a higher variance, insured when $\alpha_{ij}$ is a decreasing function of $\vert i-j\vert$.
-A large value of $\alpha$ should correspond to a small auto-correlation time. From the constraint~(\ref{eq:cs1}), $\hat p(\tau\vert x)$ is specified by  a vector
+A large value of $\alpha_{ii}$ compared to $\alpha_{ij}$ for  $i\ne j$ 
+should correspond to a small auto-correlation time. From the constraint~(\ref{eq:cs1}), $\hat p(\tau\vert x)$ is specified by  a vector
 $\{\hat p_i(x),i=1,\dots n\}$ corresponding to
 \[
 \hat p_i(x) = \hat p(\tau_1=0,\ldots,\tau_i=1,\ldots,\tau_n=0\vert x),
@@ -184,12 +185,12 @@ Optimizing ${\cal L}$ yields the following expression of the optimal parameters:
 \begin{equation}\label{eq:var}
 \frac{\sigma^2}{1+\alpha_{ij}} = \frac{{\mathbb E}_{data}\bigl[\bigl(y_i-\hat y_i(x)\bigr)^2p_j(x,{\bf y})\bigr]}{{\mathbb E}_{data}\bigl[p_j(x,{\bf y})\bigr]},
 \end{equation}
-by means of the conditional probability $P(\tau_i=1\vert x,{\bf y})$ which actually reads
+by means of the conditional probability $P(\tau_i=1\vert x,{\bf y})$ which reads
 \begin{equation}\label{eq:hatpi}
 p_i(x,{\bf y}) = \frac{1}{Z(\sigma,{\bf \alpha})}\hat p_i(x)\exp\Bigl(-\frac{1}{2\sigma^2}\sum_j\alpha_{ji}\bigl(y_j-\hat y_j(x)\bigr)^2+\frac{1}{2}\sum_j\log(1+\alpha_{ji})\Bigr).
 \end{equation}
 These are implicit equations, since ${\bf p}(x,{\bf y})$ depends on the parameters $\sigma^2$ and $\alpha_{ij}$.
-In addition the optimal $\hat {\bf p}$ reads
+In addition the optimal $\hat {\bf p}$ reads (see appendix~\ref{app:LL})
 \begin{equation}\label{eq:tildep}
 \hat p_i(x) = {\mathbb E}_{data,y}\Bigl[p_i(x,{\bf y})\Bigr].
 \end{equation}
@@ -235,16 +236,16 @@ In particular the condition for the degenerate point to be unstable is
 \[
 C_2[{\bf p}_0] > 2\bigl(1-\frac{1}{n}\bigr).
 \]
-Note that for $\Delta y_i^2(x)$ iid with variance $\sigma_0^2$ and relative kurtosis $\kappa$ (conditionally to $x$)
+Note that for $\Delta y_i(x)$ iid centered with variance $\sigma_0^2$ and relative kurtosis $\kappa$ (conditionally to $x$)
 we have $C_2 = (2+\kappa)(1-1/n)$. As a result, as soon as there are fluctuations among the $\Delta y_i^2(x)$ with non-negative relative kurtosis ($\kappa=0$ for a normal variable)
 the  degenerate solution will be unstable.
 
 \subsection{Loss function and related optimal predictor}
 Once the set $\hat {\bf y}(x)$ of predictors is learned and assuming that the correct parameters for~(\ref{eq:py}) have been found
-we would like to know given $x$, what is the optimal predictor for $y_i(x)$. Any predictor has  to come in a composite form
-$\hat z(x) = (\hat y(x),\hat I(x))$ where $\hat I(x)$ is the predicted index and $\hat y(x)$ the predicted value.
+we would like to know for a given input $x$, what is the optimal predictor for $y_i(x)$. Any predictor has  to come in a composite form
+$(\hat y(x),\hat I(x))$ where $\hat I(x)$ is the predicted index and $\hat y(x)$ the predicted value.
 This is necessarily associated to a loss function 
-which we specify as an $L_2$ norm:
+which we specify with an $L_2$ norm:
 \begin{equation}\label{eq:orloss}
 {\cal L}(\hat y,\hat I) = {\mathbb E}_{data}\Bigl[\bigl(y_{\hat I(x)}-\hat y(x)\bigr)^2\Bigr]. 
 \end{equation}
@@ -270,17 +271,17 @@ and $\sigma^2$ in order then to be able to iterate the saddle point equations. T
 From the practical point of view, the two aforementioned regression problems $\hat {\bf y}(x)$ and $\hat {\bf p}(x)$ can be solved efficiently with help of neural networks, with possibly deep
 architectures depending on the dimension of the input signal $x$. Since the output $y$ and time lag $\tau$ have common causes we expect a single architecture with feature sharing
 for $\hat {\bf y}(x)$ and $\hat {\bf p}(x)$ to be more efficient.
+\begin{figure}[ht]
+\centerline{\resizebox*{0.7\textwidth}{!}{\input{archi.pdf_t}}}
+\caption{\label{fig:archi} Architecture of the neural network specified by the number of units $(n^v,n_1^h,n_2^h,2n)$ in each layer.}
+\end{figure}
 Beside the output layer which is constrained to be of size $2 \times n$ where $n$ is the chosen size of the time window,
 the composition and size of the layers preceding the output layer are dependent on the application. 
 One may choose \emph{convolutional layers} for input data which consists of images and fully connected 
 layers for vector data.
 In section \ref{sec:exp}, we use fully connected neural architectures sketched on Figure~\ref{fig:archi}, having a maximum depth of 
 two hidden layers, for prediction of outputs and time lags. 
-\begin{figure}[ht]
-\centerline{\resizebox*{0.7\textwidth}{!}{\input{archi.pdf_t}}}
-\caption{\label{fig:archi} Architecture of the neural network specified by the number of units $(d,n_1^h,n_2^h,2n)$ in each layer.}
-\end{figure}
-In order to train it we retro-propagate the following loss function
+In order to train it we retro-propagate the following loss function:
 \begin{equation}
 \mathcal{L}(y^{(1:M)}, \hat{y}^{(1:M)}, \hat{p}^{(1:M)}) =
  \frac{1}{M}\sum_{i,m} \frac{1 + \alpha \hat{p}^{(m)}_i}{2\sigma^2}(y^{(m)}_{i} - \hat{y}^{(m)}_{i})^2   
@@ -289,8 +290,8 @@ In order to train it we retro-propagate the following loss function
 This function is computed over a mini-batch of size $M$ with $m=1\ldots M$ referring  to data sample indices within the
 mini-batch in question. Its form is  adapted from the theoretical considerations discussed in the previous section in order to allow for feature sharing.
 It can be considered as a convex relaxation of the loss function~(\ref{eq:orloss}). 
-Parameters $\alpha$ and $\sigma^2$ have been already defined. From the variational point of view it can be checked easily that this form leads
-each predictor $\hat y_i(x)$ to minimize a squared error independently of each other and of the other set of predictors $\hat {\bf p}$, while these one should converge
+Parameters $\alpha$ and $\sigma^2$ have been already defined. From the variational point of view it can be checked that this form leads
+each predictor $\hat y_i(x)$ to minimize a squared error independently of each other and of the other set of predictors $\hat {\bf p}$, while these are led to converge
 to the form given in~(\ref{eq:tildep}).
 $\tilde p(x)$ is an optional prior distribution, possibly based on expert knowledge, which corresponds to some initializing of $\hat p(x)$. 
 In practice we use
@@ -360,12 +361,11 @@ time lagged input, where $\tau(t)$ determines the time lag relationship.
 
 \subsection{Generating Predictions}
 
-In all of the following benchmarks we set $\ell = 0$ and $h = 20$ as the 
-lower limit and width of the time window respectively.
+In all of the following benchmarks we set $n = 20$ as the width of the time lag window.
 
 To evaluate the model predictions for the benchmarks, we choose the 
 prediction $\hat{y}_j$ which has the highest probability of a temporal link 
-$j = {argmax}_{i} \ \hat{p}_i \ \ i \in [t+\ell, t+\ell+h)$. The predictions 
+$j = {\argmax}_{i} \ \hat{p}_i \ \ i \in \{1,\ldots,n\}$. The predictions 
 $(\hat{y}_j, j)$ can now be compared to their corresponding ground truth values 
 $(y(t + \tau(t)), \tau(t))$. 
 
@@ -445,7 +445,7 @@ $99.92\%$ of the samples.
   \begin{subfigure}[b]{0.4\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/exp2_scatter_t_test}
-    \caption{ \textbf{Problem II}, Goodness of fit, Timalag $\tau(t)$ }
+    \caption{ \textbf{Problem II}, Goodness of fit, Time lag $\tau(t)$ }
     \label{fig:problem2_fitt}
   \end{subfigure}
   

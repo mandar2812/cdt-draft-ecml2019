@@ -11,7 +11,7 @@
 \fi\endgroup%
 \begin{picture}(14512,7383)(3361,-7948)
 \put(6121,-2131){\makebox(0,0)[lb]{\smash{{\SetFigFont{29}{34.8}{\rmdefault}{\mddefault}{\updefault}$n_1^h$}}}}
-\put(3376,-916){\makebox(0,0)[lb]{\smash{{\SetFigFont{29}{34.8}{\rmdefault}{\mddefault}{\updefault}$d$}}}}
+\put(3376,-916){\makebox(0,0)[lb]{\smash{{\SetFigFont{29}{34.8}{\rmdefault}{\mddefault}{\updefault}$n^v$}}}}
 \put(7066,-6676){\makebox(0,0)[lb]{\smash{{\SetFigFont{20}{24.0}{\rmdefault}{\mddefault}{\updefault}hidden layers}}}}
 \put(10441,-5236){\makebox(0,0)[lb]{\smash{{\SetFigFont{20}{24.0}{\rmdefault}{\mddefault}{\updefault}soft max}}}}
 \put(10036,-3076){\makebox(0,0)[lb]{\smash{{\SetFigFont{20}{24.0}{\rmdefault}{\mddefault}{\updefault}fully connected}}}}
