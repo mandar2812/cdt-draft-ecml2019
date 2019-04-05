@@ -52,6 +52,7 @@
 %
 \author{Mandar Chandorkar\inst{1,2} \and
 Cyril Furtlehner\inst{2} \and
+Bala Poduval \inst{4} \and
 Enrico Camporeale\inst{1,3} \and 
 Mich\`ele Sebag\inst{2}
 }
@@ -62,7 +63,8 @@ Mich\`ele Sebag\inst{2}
 %
 \institute{Centrum Wiskunde en Informatica, Amsterdam 1098XG, Netherlands \and
 TAU, CNRS $-$ INRIA $-$ Univ. Paris-Saclay, France\and
-CIRES, University of Colorado, Boulder, CO, USA}
+CIRES, University of Colorado, Boulder, CO, USA \and 
+University of New Hampshire}
 %
 \maketitle              % typeset the header of the contribution
 %
@@ -382,6 +384,24 @@ $\tau(t) = k$
 \end{enumerate}
 
 
+\subsection{Solar Wind Speed Prediction}:\label{sec:solarwind}
+
+We apply our model on the task of solar wind speed prediction using 
+solar magnetic \emph{flux tube expansion}(FTE) data produced by the 
+\emph{current sheet source surface} (CSSS) \cite{csss} model.
+
+The task of predicting solar wind speed from heliospheric data is challenging due 
+to the large distance between the Sun and the Earth as well as the non-stationary 
+propagation time of the solar plasma through the interplanetary medium.
+
+In recent works \cite{Poduval_2014} \& \cite{neuralnetsw} FTE data has been used to
+train models for solar wind speed prediction, but these models assume a constant propagation 
+time when combining FTE data with solar wind speed measurements close to the Earth. 
+
+The CSSS model is run on magnetogram data taken from the \emph{Solar Dynamics Observatory} 
+corresponding to the time period 2011 to 2017. Out of this, one year of data (2014) was 
+kept aside for model testing and the rest for training and hyper-parameter search.
+
 \subsection{Results}
 
 The results of the experiments of \ref{sec:benchmark} are summarized in table \ref{tab:results_syn} 
@@ -416,10 +436,10 @@ to each candidate model $\hat{y}_i(x)$, regardless of the input $x$.
   \textbf{II} & $14.24$ ($1.55$) & $19.31$ ($2.04$) & $0.92$ ($0.83$) & $34.43$ & $0.87$\\
   \textbf{III} & $4.12$ ($1.66$) & $6.4$ ($2.1$) & $0.92$ ($0.81$) & $10.16$ & $0.76$\\
   \textbf{IV} & $13.81$ ($1.0$) & $20.13$ ($1.37$) & $0.91$ ( $0.90$) & $31.7$ & $0.833$\\
+  Solar Wind & $63.75$ & $79.61$ & $0.25$ & $80.09$ & $0.998$\\
   \hline
   \end{tabular}
 \end{table}
-
 
 \subsubsection{Problem I}
 
@@ -581,6 +601,7 @@ is now a monotonic relationship between the output and time lag. %A key differen
 %we can see that the time lag errors are symmetric.
 
 
+
 \begin{figure*}
   \centering
 
@@ -616,6 +637,17 @@ is now a monotonic relationship between the output and time lag. %A key differen
   
   \caption{\textbf{Problem IV}, Results}
 \end{figure*}
+
+
+\subsubsection{Solar Wind Prediction}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.5\textwidth]{figures/test_scatter_v}
+  \caption{Predicted vs Actual Solar Wind Speed} 
+  \label{fig:sw_preds}
+\end{figure}
+
 
 \section{Conclusions}
 
