@@ -54,8 +54,7 @@
 Cyril Furtlehner\inst{2} \and
 Bala Poduval \inst{4} \and
 Enrico Camporeale\inst{1,3} \and 
-Mich\`ele Sebag\inst{2} \and 
-Bala Poduval
+Mich\`ele Sebag\inst{2}
 }
 %
 \authorrunning{Chandorkar et al.}
@@ -65,7 +64,7 @@ Bala Poduval
 \institute{Centrum Wiskunde en Informatica, Amsterdam 1098XG, Netherlands \and
 TAU, CNRS $-$ INRIA $-$ Univ. Paris-Saclay, France\and
 CIRES, University of Colorado, Boulder, CO, USA \and 
-University of New Hampshire}
+University of New Hampshire, Durham, NH 03824, USA}
 %
 \maketitle              % typeset the header of the contribution
 %
@@ -305,8 +304,6 @@ In practice we use
 with $\beta>0$ an additional parameter, which in the end correspond to the  shift $\alpha\to\alpha+\beta$.
 
 
-
-
 \subsection{Hyper-parameters tuning}
 
 Hyper-parameter selection is an important part of the model training process in the PDT problem. 
@@ -405,8 +402,8 @@ kept aside for model testing and the rest for training and hyper-parameter searc
 
 \subsection{Results}
 
-The results of the experiments of \ref{sec:benchmark} are summarized in table \ref{tab:results_syn} 
-and evaluated using the following charts.
+The results of the experiments of \ref{sec:benchmark} and \ref{sec:solarwind} are summarized 
+in table \ref{tab:results_syn} and evaluated using the following charts.
 
 \begin{enumerate}
     \item Goodness of fit: These charts visualise the scatter between the ground truth values of the output
@@ -418,8 +415,8 @@ and evaluated using the following charts.
           in time lag. They help in visualizing the shape of the error distribution.
 \end{enumerate}
 
-Apart from the standard performance metrics such as R.M.S.E, M.A.E and Pearson correlation,
-we attach the values of $\sigma_0$ and $C_1$ introduced in section \ref{sec:stability}.
+Apart from the standard performance metrics, we attach the values of $\sigma_0$ 
+and $C_1$ introduced in section \ref{sec:stability}.
 
 The value of $\sigma_0$ gives a base line to compare the R.M.S.E scores of the model, 
 in fact an R.M.S.E score less than $\sigma_0$ and $C_1 < 1$ indicates that the model 
@@ -437,7 +434,7 @@ to each candidate model $\hat{y}_i(x)$, regardless of the input $x$.
   \textbf{II} & $14.24$ ($1.55$) & $19.31$ ($2.04$) & $0.92$ ($0.83$) & $34.43$ & $0.87$\\
   \textbf{III} & $4.12$ ($1.66$) & $6.4$ ($2.1$) & $0.92$ ($0.81$) & $10.16$ & $0.76$\\
   \textbf{IV} & $13.81$ ($1.0$) & $20.13$ ($1.37$) & $0.91$ ( $0.90$) & $31.7$ & $0.833$\\
-  Solar Wind & $63.75$ & $79.61$ & $0.25$ & $80.09$ & $0.998$\\
+  \textbf{Solar Wind} & $63.75$ & $79.61$ & $0.25$ & $80.09$ & $0.998$\\
   \hline
   \end{tabular}
 \end{table}
@@ -506,18 +503,13 @@ $99.92\%$ of the samples.
 
 \subsubsection{Problem II}
 
-Figures \ref{fig:problem2_fitv} and \ref{fig:problem2_fitt} compare the model's predicted output 
-and time lag with their respective ground truth values.
+Figures \ref{fig:problem2_fitv} and \ref{fig:problem2_fitt} show that the model is able to 
+make accurate predictions for the output as well as time lag.
 
-In figure \ref{fig:problem2_error} we present a scatter plot which shows the heat map of the 
-errors in output versus the error in time lag predictions.
-
-In figure \ref{fig:problem2_curves} we present smoothed trends extracted from the data presented in 
+Figure \ref{fig:problem2_curves} presents smoothed trends extracted from the data presented in 
 \ref{fig:problem2_fitv}, the red curve represents the output time lag function learned by the model 
-while the black curve is the \emph{ground truth} dependence between the two. 
-
-The model is able to approximate the inverse relationship between the output and 
-time lag from the training data.
+while the black curve is the \emph{ground truth} dependence between the two. The model is able to 
+approximate the inverse relationship between the output and time lag from the training data.
 
 
 \begin{figure*}
@@ -577,29 +569,16 @@ time lag from the training data.
 
 Problem III involves a more complicated output time lag relationship than problem II due to the 
 effect of acceleration. From figures \ref{fig:problem3_fitv} and \ref{fig:problem3_fitv}, 
-it can be observed that the model can still learn the time lag and output mappings although 
-in this case the time lag error distribution has a slightly longer tail in figure 
-\ref{fig:problem3_error} as compared to \ref{fig:problem2_error}.
-
-%One observation common to the results of problems II and III is that the error distribution of 
-%the time lag is asymmetric, the model tends to underestimate the time lag. Upon closer examination 
-%of the predictions (figure \ref{fig:problem3_lag_error_jus}), it is observed that the data patterns 
-%for which the model has a time lag prediction error $\leq -2.5$, tend to occur in lower region of 
-%the output space. %(table \ref{table:problem3_stats}).
-
-%It is thus the case that for applications where there is an inverse relationship between the output 
-%and time lag, the model's time lag errors are expected to be biased towards the negative region, 
-%but when output and time lag are positively correlated, the time lag errors should be unbiased.
-
+it can be observed that the model can still learn the time lag and output mappings but the 
+time lag error distribution (\ref{fig:problem3_error}) has a slightly longer tail as compared to 
+figure \ref{fig:problem2_error}.
 
 
 \subsubsection{Problem IV}
 
 Figures \ref{fig:problem4_fitv}, \ref{fig:problem4_fitt}, \ref{fig:problem4_curves} summarize 
 the results of the experiment. This case is different as compared to the previous problems as there 
-is now a monotonic relationship between the output and time lag. %A key difference in the model 
-%performance in this problem can be observed in error scatter chart \ref{fig:problem4_curves}, 
-%we can see that the time lag errors are symmetric.
+is now a monotonic relationship between the output and time lag.
 
 
 
@@ -642,6 +621,11 @@ is now a monotonic relationship between the output and time lag. %A key differen
 
 \subsubsection{Solar Wind Prediction}
 
+Figure \ref{fig:sw_preds} shows observed solar wind speed versus the model's predictions for the test data. 
+Although the observed correlation ($0.25$) seems low, this in fact shows a slight improvement above the 
+results in \cite{Poduval_2014} where a correlation score of $0.23$ was observed.
+
+
 \begin{figure}
   \centering
   \includegraphics[width=0.5\textwidth]{figures/test_scatter_v}
@@ -655,12 +639,13 @@ is now a monotonic relationship between the output and time lag. %A key differen
 We present in this work a formulation and a novel solution methodology for the problem of performing 
 inference and forecasting in the context of lagged causal relationships between time series. 
 We call this problem \emph{Probabilistic Dynamic Time Lag} (PDT) to note the non-stationary nature of the 
-causal link between time series $x(t)$ and $y(t)$. We outline a neural network based solution to this 
-problem and benchmark its performance on a set of carefully constructed problems.
+causal link between time series $x(t)$ and $y(t)$. 
 
-This work is an area of active research and progress. Going ahead we plan to apply this methodology 
-to the problem of forecasting of geomagnetic phenomena which are driven by features observed on the 
-surface of the Sun, i.e. sunspots and active regions.
+We outlined a neural network based solution to this problem and benchmark its performance 
+on a set of synthetic examples.
+
+Going ahead we plan to augment the FTE data set with other solar data sources to improve
+the model's predictive performance on the solar wind forecasting problem.
 
 
 \subsubsection*{Acknowledgements}
