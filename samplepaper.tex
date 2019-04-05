@@ -402,6 +402,8 @@ The results of the experiments of \ref{sec:benchmark} are summarized in table \r
 and evaluated using the following charts.
 
 \begin{enumerate}
+    \item Goodness of fit: These charts visualise the scatter between the ground truth values of the output
+          and time lag versus the values predicted by the model. 
     \item Output-Time Lag charts: Since the output time lag relationship can be expressed in closed 
           form, we can visualize this relationship in the generated data sets and evaluate how well 
           the model is able to infer it.
@@ -412,14 +414,14 @@ and evaluated using the following charts.
 \begin{table}
   \caption{Performance: Output (Time Lag) Prediction}\label{tab:results_syn}
   \centering
-  \begin{tabular}{ l l l l}
+  \begin{tabular}{ l l l l l l}
   \hline
-  Problem &  M.A.E & R.M.S.E & Pearson Corr.\\
+  Problem &  M.A.E & R.M.S.E & Pearson Corr. & $\sigma_0$ & $C_1$\\
   \hline
-  \textbf{I} & $10.74$ ($0.024$)  & $15.37$ ($0.48$) & $0.96$ (--)\\
-  \textbf{II} & $14.24$ ($1.55$) & $19.31$ ($2.04$) & $0.92$ ($0.83$)\\
-  \textbf{III} & $4.12$ ($1.66$) & $6.4$ ($2.1$) & $0.92$ ($0.81$)\\
-  \textbf{IV} & $13.81$ ($1.0$) & $20.13$ ($1.37$) & $0.91$ ( $0.90$)\\
+  \textbf{I} & $10.74$ ($0.024$)  & $15.37$ ($0.48$) & $0.96$ (--) & $39.0$ & $0.87$\\
+  \textbf{II} & $14.24$ ($1.55$) & $19.31$ ($2.04$) & $0.92$ ($0.83$) & $34.43$ & $0.87$\\
+  \textbf{III} & $4.12$ ($1.66$) & $6.4$ ($2.1$) & $0.92$ ($0.81$) & $10.16$ & $0.76$\\
+  \textbf{IV} & $13.81$ ($1.0$) & $20.13$ ($1.37$) & $0.91$ ( $0.90$) & $31.7$ & $0.833$\\
   \hline
   \end{tabular}
 \end{table}
