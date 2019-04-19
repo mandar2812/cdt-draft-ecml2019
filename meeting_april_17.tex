@@ -1,0 +1,30 @@
+Stability metric
+the second derivative of \cal L wrt alpha is
+ C_2[p]-2C_1[p]^2 instead of C_2[p]-2C_1[p] 
+ so the necessary condition for stability is C_2 < 2C_1^2  (sorry for that)
+
+In the mail, discussed how to use this to update the hyper-parameters.
+But too expensive in each time step.
+
+Using eq 5, numerical instability.
+The Z is difficult to train; (although using the explicit gradient)
+
+Mandar tried 
+Eq. 5; F (Appendix A); and Eq. 12.
+Pb with the first 2: value for C_1, C_2 were not converging.
+But with Eq. 12, converging toward stable point.
+
+s_0 is \sigma_0**2 
+
+Link between the two p_i: (Cyril and Mandar).
+In the alternating version, p_i is not converging. 
+
+Singular solution; the system is converging to; \hat p constant (i.e., not depending on x). WHY ?
+
+Same \hat p over different runs ?
+
+Pb of saturation. look at the distribution of your predictors for the time lag.
+Could be something in the data; fooling the predictor. 
+
+Wind: 
+if there are exceptional events, could replace this with the rank. 
